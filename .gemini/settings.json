@@ -1,0 +1,12 @@
+{
+  "general": {
+    "previewFeatures": true
+  },
+  "ui": {
+    "footer": {
+      "hideContextPercentage": false
+    },
+    "showMemoryUsage": true,
+    "useFullWidth": true
+  }
+}
