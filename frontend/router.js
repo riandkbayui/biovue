@@ -28,6 +28,27 @@ const routes = [
       { path: 'page-builder/:id', name: 'member-page-builder-edit', component: () => import('@/views/member/PageBuilder.vue') },
     ]
   },
+  {
+    path: '/admin',
+    component: () => import('@/layouts/AdminLayout.vue'),
+    children: [
+      { path: '', redirect: '/admin/dashboard' },
+      { path: 'dashboard', name: 'admin-dashboard', component: () => import('@/views/admin/Dashboard.vue') },
+      { path: 'users', name: 'admin-users', component: () => import('@/views/admin/users/Index.vue') },
+      { path: 'users/create', name: 'admin-users-create', component: () => import('@/views/admin/users/Form.vue') },
+      { path: 'users/:id/edit', name: 'admin-users-edit', component: () => import('@/views/admin/users/Form.vue') },
+      { path: 'pages', name: 'admin-pages', component: () => import('@/views/admin/Pages.vue') },
+      { path: 'faq', name: 'admin-faq', component: () => import('@/views/admin/Faq.vue') },
+      { path: 'plans', name: 'admin-plans', component: () => import('@/views/admin/plans/Index.vue') },
+      { path: 'plans/create', name: 'admin-plans-create', component: () => import('@/views/admin/plans/Form.vue') },
+      { path: 'plans/:id/edit', name: 'admin-plans-edit', component: () => import('@/views/admin/plans/Form.vue') },
+      { path: 'transactions', name: 'admin-transactions', component: () => import('@/views/admin/transactions/Index.vue') },
+      { path: 'transactions/:id/edit', name: 'admin-transactions-edit', component: () => import('@/views/admin/transactions/Form.vue') },
+      { path: 'notifications', name: 'admin-notifications', component: () => import('@/views/admin/Notifications.vue') },
+      { path: 'profile', name: 'admin-profile', component: () => import('@/views/admin/Profile.vue') },
+      { path: 'settings', name: 'admin-settings', component: () => import('@/views/admin/Settings.vue') },
+    ]
+  },
 ]
 
 const router = createRouter({
