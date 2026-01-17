@@ -1,21 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { authMiddleware } from '@/middleware/auth'
 import HelloWorld from '@/components/HelloWorld.vue'
 import Login from '@/views/Login.vue' // Import the login component
 
 const routes = [
   { path: '/', name: 'home', component: () => import('@/views/Home.vue') },
-  { path: '/login', name: 'login', component: Login },
-  { path: '/register', name: 'register', component: () => import('@/views/Register.vue') },
+  { path: '/login', name: 'login', component: Login, meta: { guestOnly: true } },
+  { path: '/register', name: 'register', component: () => import('@/views/Register.vue'), meta: { guestOnly: true } },
   { path: '/about', name: 'about', component: () => import('@/views/About.vue') },
   { path: '/blog', name: 'blog', component: () => import('@/views/Blog.vue') },
   { path: '/contact', name: 'contact', component: () => import('@/views/Contact.vue') },
   { path: '/privacy', name: 'privacy', component: () => import('@/views/Privacy.vue') },
   { path: '/terms', name: 'terms', component: () => import('@/views/Terms.vue') },
-  { path: '/forgot-password', name: 'forgot-password', component: () => import('@/views/ForgotPassword.vue') },
-  { path: '/reset-password', name: 'reset-password', component: () => import('@/views/ResetPassword.vue') },
+  { path: '/forgot-password', name: 'forgot-password', component: () => import('@/views/ForgotPassword.vue'), meta: { guestOnly: true } },
+  { path: '/reset-password', name: 'reset-password', component: () => import('@/views/ResetPassword.vue'), meta: { guestOnly: true } },
   {
     path: '/member',
     component: () => import('@/layouts/MemberLayout.vue'),
+    meta: { requiresAuth: true, role: 'member' },
     children: [
       { path: '', redirect: '/member/dashboard' },
       { path: 'dashboard', name: 'member-dashboard', component: () => import('@/views/member/Dashboard.vue') },
@@ -24,6 +26,10 @@ const routes = [
       { path: 'bills', name: 'member-bills', component: () => import('@/views/member/Bills.vue') },
       { path: 'tutorial', name: 'member-tutorial', component: () => import('@/views/member/Tutorial.vue') },
       { path: 'profile', name: 'member-profile', component: () => import('@/views/member/Profile.vue') },
+      { path: 'notifications', name: 'member-notifications', component: () => import('@/views/member/Notifications.vue') },
+      { path: 'upgrade', name: 'member-upgrade', component: () => import('@/views/member/Upgrade.vue') },
+      { path: 'checkout', name: 'member-checkout', component: () => import('@/views/member/Checkout.vue') },
+      { path: 'invoice', name: 'member-invoice', component: () => import('@/views/member/Invoice.vue') },
       { path: 'page-builder', name: 'member-page-builder', component: () => import('@/views/member/PageBuilder.vue') },
       { path: 'page-builder/:id', name: 'member-page-builder-edit', component: () => import('@/views/member/PageBuilder.vue') },
     ]
@@ -31,6 +37,7 @@ const routes = [
   {
     path: '/admin',
     component: () => import('@/layouts/AdminLayout.vue'),
+    meta: { requiresAuth: true, role: 'admin' },
     children: [
       { path: '', redirect: '/admin/dashboard' },
       { path: 'dashboard', name: 'admin-dashboard', component: () => import('@/views/admin/Dashboard.vue') },
@@ -38,6 +45,8 @@ const routes = [
       { path: 'users/create', name: 'admin-users-create', component: () => import('@/views/admin/users/Form.vue') },
       { path: 'users/:id/edit', name: 'admin-users-edit', component: () => import('@/views/admin/users/Form.vue') },
       { path: 'pages', name: 'admin-pages', component: () => import('@/views/admin/Pages.vue') },
+      { path: 'banks', name: 'admin-banks', component: () => import('@/views/admin/Banks.vue') },
+      { path: 'payment-channels', name: 'admin-payment-channels', component: () => import('@/views/admin/PaymentChannels.vue') },
       { path: 'faq', name: 'admin-faq', component: () => import('@/views/admin/Faq.vue') },
       { path: 'plans', name: 'admin-plans', component: () => import('@/views/admin/plans/Index.vue') },
       { path: 'plans/create', name: 'admin-plans-create', component: () => import('@/views/admin/plans/Form.vue') },
@@ -64,5 +73,8 @@ const router = createRouter({
     return { top: 0 }
   }
 })
+
+// Middleware / Navigation Guard
+router.beforeEach(authMiddleware)
 
 export default router

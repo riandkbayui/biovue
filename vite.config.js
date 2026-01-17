@@ -43,6 +43,11 @@ export default defineConfig({
   root: 'frontend',
   publicDir: "../statics",
 
+  server: {
+    port: 5173,
+    host: '0.0.0.0',
+  },
+
   build: {
     outDir: path.resolve(__dirname, 'statics'),
     emptyOutDir: false,

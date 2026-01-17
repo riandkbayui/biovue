@@ -8,8 +8,8 @@
             <i :class="['bi', stat.icon, stat.color]"></i>
           </div>
           <div>
-            <p class="text-sm font-medium text-gray-500">{{ stat.label }}</p>
-            <h3 class="text-2xl font-bold text-gray-900">{{ stat.value }}</h3>
+            <p class="text-xs font-medium text-gray-500 2xl:text-sm">{{ stat.label }}</p>
+            <h3 class="text-xl font-bold text-gray-900 2xl:text-2xl">{{ stat.value }}</h3>
           </div>
         </div>
       </div>

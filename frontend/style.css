@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* NProgress Custom Style */
+#nprogress .bar {
+  background: #10b981 !important; /* Emerald 500 */
+  height: 3px !important;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #10b981, 0 0 5px #10b981 !important;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

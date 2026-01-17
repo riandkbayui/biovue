@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 
 const isSidebarOpen = ref(true)
 const showNotifications = ref(false)
@@ -17,6 +19,11 @@ const toggleNotifications = () => {
     showNotifications.value = !showNotifications.value
 }
 
+const viewAllNotifications = () => {
+    showNotifications.value = false
+    router.push('/member/notifications')
+}
+
 const menuItems = [
   { name: 'Dashboard', icon: 'bi-grid-1x2-fill', path: '/member/dashboard' },
   { name: 'My Pages', icon: 'bi-files', path: '/member/my-pages' },
@@ -27,7 +34,7 @@ const menuItems = [
 ]
 
 const handleLogout = () => {
-    // Logic logout di sini
+    authStore.clearAuth()
     router.push('/login')
 }
 
@@ -72,7 +79,7 @@ const handleNavItemClick = () => {
           <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center font-bold text-emerald-600 flex-shrink-0 shadow-lg">
             A
           </div>
-          <span v-if="isSidebarOpen || !isSidebarOpen" :class="['text-xl font-bold tracking-tight whitespace-nowrap transition-opacity duration-300', !isSidebarOpen ? 'lg:opacity-0' : 'opacity-100']">Aksibio</span>
+          <span v-if="isSidebarOpen || !isSidebarOpen" :class="['text-xl font-bold tracking-tight whitespace-nowrap transition-opacity duration-300', !isSidebarOpen ? 'lg:opacity-0' : 'opacity-100']">AKSI BIO</span>
         </div>
 
         <!-- Navigation -->
@@ -134,11 +141,14 @@ const handleNavItemClick = () => {
         </div>
 
         <div class="flex items-center gap-3 sm:gap-6">
-          <!-- Quick Status -->
-          <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-medium uppercase tracking-wider">
-             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-             Pro Plan
-          </div>
+          <!-- Upgrade Button (Desktop Only) -->
+          <router-link 
+            to="/member/upgrade"
+            class="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-green-700 hover:bg-green-800 hover:text-white text-white text-xs font-bold transition-all shadow-lg shadow-green-500/20 active:scale-95"
+          >
+            <i class="bi bi-rocket-takeoff-fill"></i>
+            Upgrade Pro
+          </router-link>
 
           <!-- Notification -->
           <div class="relative">
@@ -169,7 +179,7 @@ const handleNavItemClick = () => {
                     </div>
                 </div>
                 <div class="px-4 py-2 border-t border-gray-50 text-center">
-                    <button @click="showNotifications = false" class="text-xs font-medium text-gray-500 hover:text-emerald-600 transition-colors py-1">Tutup</button>
+                    <button @click="viewAllNotifications" class="text-xs font-medium text-gray-500 hover:text-emerald-600 transition-colors py-1">Lihat Semua Notifikasi</button>
                 </div>
             </div>
           </div>
@@ -177,11 +187,12 @@ const handleNavItemClick = () => {
           <!-- User Profile -->
           <div class="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity" @click="$router.push('/member/profile')">
              <div class="text-right hidden md:block">
-                <p class="text-sm font-bold text-gray-900 leading-none">Rian DK</p>
-                <p class="text-[10px] text-gray-500 mt-1">Free Account</p>
+                <p class="text-sm font-bold text-gray-900 leading-none">{{ authStore.user.name }}</p>
+                <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-wider">{{ authStore.user.plan }} Account</p>
              </div>
              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-100 to-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold overflow-hidden shadow-sm">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky" alt="avatar" />
+                <img v-if="authStore.user.avatar" :src="authStore.user.avatar" class="w-full h-full object-cover" />
+                <img v-else :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${authStore.user.name}`" alt="avatar" />
              </div>
           </div>
         </div>

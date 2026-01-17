@@ -5,7 +5,8 @@
       :key="index"
       :href="link.url || '#'"
       target="_blank"
-      class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-emerald-600 hover:text-white transition-all"
+      class="social-link w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 transition-all"
+      :style="{ '--accent-color': theme?.accentColor || '#059669' }"
     >
       <i :class="['bi', getSocialIcon(link.platform)]"></i>
     </a>
@@ -14,7 +15,8 @@
 
 <script setup>
 defineProps({
-  data: Object
+  data: Object,
+  theme: Object
 })
 
 const getSocialIcon = (platform) => {
@@ -29,3 +31,11 @@ const getSocialIcon = (platform) => {
   return icons[platform] || 'bi-link'
 }
 </script>
+
+<style scoped>
+.social-link:hover {
+  background-color: var(--accent-color);
+  color: white;
+  transform: translateY(-2px);
+}
+</style>

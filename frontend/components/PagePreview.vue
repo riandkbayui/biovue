@@ -1,32 +1,70 @@
 <template>
-  <div class="p-6 space-y-4">
-    <div class="text-center mb-6">
-      <div class="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold">
+  <div 
+    class="min-h-full pl-6 pr-8 py-6 pb-20 space-y-4 transition-all duration-500"
+    :style="bgStyle"
+  >
+    <div v-if="!hasProfileBlock" class="text-center mb-8">
+      <div 
+        class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-emerald-500/20"
+        :style="{ 
+          backgroundColor: pageData.theme?.accentColor || '#059669',
+          boxShadow: `0 10px 15px -3px ${pageData.theme?.accentColor}33` 
+        }"
+      >
         {{ pageData.title?.charAt(0) || 'A' }}
       </div>
-      <h1 class="text-xl font-bold text-gray-900">{{ pageData.title || 'Your Name' }}</h1>
-      <p class="text-sm text-gray-500 mt-1">@{{ pageData.slug || 'username' }}</p>
+      <h1 class="text-xl font-bold text-gray-900">{{ pageData.title || 'Halaman Baru' }}</h1>
+      <p class="text-sm text-gray-500 mt-1">aksibio.com/{{ pageData.slug || 'username' }}</p>
     </div>
 
-    <div class="space-y-3">
+    <div class="space-y-4">
       <div v-for="block in pageData.blocks" :key="block.id">
-        <component :is="getPreviewComponent(block.type)" :data="block.data" />
+        <component 
+          :is="getPreviewComponent(block.type)" 
+          :data="block.data" 
+          :theme="pageData.theme"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, computed } from 'vue'
 import TextPreview from '@/components/previews/TextPreview.vue'
 import LinkPreview from '@/components/previews/LinkPreview.vue'
 import ImagePreview from '@/components/previews/ImagePreview.vue'
 import VideoPreview from '@/components/previews/VideoPreview.vue'
 import SocialPreview from '@/components/previews/SocialPreview.vue'
 import DividerPreview from '@/components/previews/DividerPreview.vue'
+import ProfilePreview from '@/components/previews/ProfilePreview.vue'
+import SlideshowPreview from '@/components/previews/SlideshowPreview.vue'
+import AccordionPreview from '@/components/previews/AccordionPreview.vue'
+import AlertPreview from '@/components/previews/AlertPreview.vue'
+import CountdownPreview from '@/components/previews/CountdownPreview.vue'
+import GridPreview from '@/components/previews/GridPreview.vue'
 
-defineProps({
+const props = defineProps({
   pageData: Object
+})
+
+const hasProfileBlock = computed(() => {
+  return props.pageData.blocks.some(b => b.type === 'profile')
+})
+
+const bgStyle = computed(() => {
+  const theme = props.pageData.theme || {}
+  if (theme.backgroundType === 'image' && theme.backgroundImage) {
+    return {
+      backgroundImage: `url(${theme.backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }
+  }
+  return {
+    backgroundColor: theme.backgroundColor || '#f9fafb'
+  }
 })
 
 const getPreviewComponent = (type) => {
@@ -37,6 +75,12 @@ const getPreviewComponent = (type) => {
     video: VideoPreview,
     social: SocialPreview,
     divider: DividerPreview,
+    profile: ProfilePreview,
+    slideshow: SlideshowPreview,
+    accordion: AccordionPreview,
+    alert: AlertPreview,
+    countdown: CountdownPreview,
+    grid: GridPreview,
   }
   return components[type] || TextPreview
 }

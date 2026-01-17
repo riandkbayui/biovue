@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 
 const isSidebarOpen = ref(true)
 const showNotifications = ref(false)
@@ -24,16 +26,40 @@ const viewAllNotifications = () => {
 }
 
 const menuItems = [
-  { name: 'Dashboard Admin', icon: 'bi-speedometer2', path: '/admin/dashboard' },
+  { name: 'Dashboard', icon: 'bi-speedometer2', path: '/admin/dashboard' },
   { name: 'Transaksi', icon: 'bi-cash-stack', path: '/admin/transactions' },
   { name: 'Manajemen Halaman', icon: 'bi-files', path: '/admin/pages' },
-  { name: 'Manajemen Pengguna', icon: 'bi-people-fill', path: '/admin/users' },
-  { name: 'Paket Langganan', icon: 'bi-card-checklist', path: '/admin/plans' },
-  { name: 'Manajemen FAQ', icon: 'bi-question-circle', path: '/admin/faq' },
+  { 
+    name: 'Data Master', 
+    icon: 'bi-database-fill', 
+    children: [
+      { name: 'Manajemen Pengguna', path: '/admin/users' },
+      { name: 'Paket Langganan', path: '/admin/plans' },
+      { name: 'Manajemen FAQ', path: '/admin/faq' },
+      { name: 'Daftar Bank', path: '/admin/banks' },
+      { name: 'Saluran Pembayaran', path: '/admin/payment-channels' },
+    ]
+  },
   { name: 'Pengaturan Sistem', icon: 'bi-gear-fill', path: '/admin/settings' },
 ]
 
+const openSubMenus = ref([])
+
+const toggleSubMenu = (name) => {
+  if (openSubMenus.value.includes(name)) {
+    openSubMenus.value = openSubMenus.value.filter(n => n !== name)
+  } else {
+    openSubMenus.value.push(name)
+  }
+}
+
+const isChildActive = (item) => {
+  if (!item.children) return false
+  return item.children.some(child => route.path === child.path)
+}
+
 const handleLogout = () => {
+    authStore.clearAuth()
     router.push('/login')
 }
 
@@ -73,34 +99,69 @@ const handleNavItemClick = () => {
       <!-- Sidebar Content -->
       <div class="relative z-10 h-full flex flex-col">
         <!-- Logo -->
-        <div class="p-6 flex items-center gap-3">
+        <div class="px-6 py-4 flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center font-bold text-indigo-700 flex-shrink-0 shadow-lg">
             A
           </div>
-          <span v-if="isSidebarOpen" class="text-xl font-bold tracking-tight whitespace-nowrap">Admin Aksibio</span>
+          <span v-if="isSidebarOpen" class="text-xl font-bold tracking-tight whitespace-nowrap">AKSI BIO</span>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-3 mt-4 space-y-1">
-          <router-link
-            v-for="item in menuItems"
-            :key="item.name"
-            :to="item.path"
-            @click="handleNavItemClick"
-            :class="[
-              'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group',
-              route.path === item.path
-                ? 'bg-white/10 text-white border border-white/20 shadow-inner'
-                : 'text-indigo-50 hover:bg-white/5 hover:text-white'
-            ]"
-          >
-            <i :class="['bi text-lg', item.icon, route.path === item.path ? 'opacity-100' : 'opacity-70 group-hover:opacity-100']"></i>
-            <span :class="['font-medium whitespace-nowrap transition-opacity duration-300', !isSidebarOpen ? 'lg:opacity-0' : 'opacity-100']">{{ item.name }}</span>
+        <nav class="flex-1 px-3 mt-4 space-y-1 overflow-y-auto custom-scrollbar">
+          <template v-for="item in menuItems" :key="item.name">
+            <!-- Menu with Children -->
+            <div v-if="item.children">
+              <div
+                @click="toggleSubMenu(item.name)"
+                :class="[
+                  'w-full cursor-pointer flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group',
+                  isChildActive(item) ? 'bg-white/5 text-white' : 'text-indigo-50 hover:bg-white/5 hover:text-white'
+                ]"
+              >
+                <div class="flex items-center gap-3">
+                  <i :class="['bi text-lg', item.icon, isChildActive(item) ? 'opacity-100' : 'opacity-70 group-hover:opacity-100']"></i>
+                  <span :class="['font-medium whitespace-nowrap transition-opacity duration-300', !isSidebarOpen ? 'lg:hidden' : 'opacity-100']">{{ item.name }}</span>
+                </div>
+                <i v-if="isSidebarOpen" :class="['bi bi-chevron-down transition-transform text-[10px]', openSubMenus.includes(item.name) ? 'rotate-180' : '']"></i>
+              </div>
 
-            <div v-if="!isSidebarOpen" class="hidden lg:block fixed left-24 bg-gray-900 text-white px-2 py-1 rounded text-xs invisible group-hover:visible shadow-xl border border-white/10 z-[60]">
-               {{ item.name }}
+              <!-- Sub-menu Items -->
+              <div v-if="openSubMenus.includes(item.name) && isSidebarOpen" class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
+                <router-link
+                  v-for="child in item.children"
+                  :key="child.name"
+                  :to="child.path"
+                  @click="handleNavItemClick"
+                  :class="[
+                    'flex items-center px-4 py-2 rounded-lg text-sm transition-all duration-200',
+                    route.path === child.path ? 'text-white hover:text-yellow-400 font-bold bg-white/10' : 'text-indigo-100/60 hover:text-white hover:bg-white/5'
+                  ]"
+                >
+                  {{ child.name }}
+                </router-link>
+              </div>
             </div>
-          </router-link>
+
+            <!-- Regular Menu -->
+            <router-link
+              v-else
+              :to="item.path"
+              @click="handleNavItemClick"
+              :class="[
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group',
+                route.path === item.path
+                  ? 'bg-white/10 text-white hover:text-yellow-400 border border-white/20 shadow-inner'
+                  : 'text-indigo-50 hover:bg-white/5 hover:text-white'
+              ]"
+            >
+              <i :class="['bi text-lg', item.icon, route.path === item.path ? 'opacity-100' : 'opacity-70 group-hover:opacity-100']"></i>
+              <span :class="['font-medium whitespace-nowrap transition-opacity duration-300', !isSidebarOpen ? 'lg:opacity-0' : 'opacity-100']">{{ item.name }}</span>
+
+              <div v-if="!isSidebarOpen" class="hidden lg:block fixed left-24 bg-gray-900 text-white px-2 py-1 rounded text-xs invisible group-hover:visible shadow-xl border border-white/10 z-[60]">
+                 {{ item.name }}
+              </div>
+            </router-link>
+          </template>
         </nav>
 
         <!-- Logout Section -->
@@ -178,11 +239,12 @@ const handleNavItemClick = () => {
 
           <div class="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity" @click="$router.push('/admin/profile')">
              <div class="text-right hidden md:block">
-                <p class="text-sm font-bold text-gray-900 leading-none">Bio Admin</p>
-                <p class="text-[10px] text-gray-500 mt-1">Akses Master</p>
+                <p class="text-sm font-bold text-gray-900 leading-none">{{ authStore.user.name }}</p>
+                <p class="text-[10px] text-gray-500 mt-1 capitalize">{{ authStore.user.role }} Master</p>
              </div>
              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold overflow-hidden shadow-sm">
-                <i class="bi bi-person-badge-fill text-xl"></i>
+                <img v-if="authStore.user.avatar" :src="authStore.user.avatar" class="w-full h-full object-cover" />
+                <i v-else class="bi bi-person-badge-fill text-xl"></i>
              </div>
           </div>
         </div>

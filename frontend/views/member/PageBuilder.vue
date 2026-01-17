@@ -26,7 +26,7 @@
         </div>
       </div>
 
-      <div class="p-4 sm:p-6 space-y-6">
+      <div class="py-4 sm:p-6 space-y-6">
         <!-- Page Settings -->
         <div class="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6">
           <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -102,6 +102,84 @@
                 </div>
               </div>
             </div>
+
+            <div class="pt-4 border-t border-gray-100">
+              <label class="block text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="bi bi-palette"></i>
+                Tampilan Halaman (Background)
+              </label>
+              
+              <div class="space-y-4">
+                <!-- Type Selector -->
+                <div class="flex p-1 bg-gray-100 rounded-xl w-fit">
+                  <button 
+                    @click="pageData.theme.backgroundType = 'color'"
+                    :class="['px-4 py-1.5 rounded-lg text-sm font-bold transition-all', pageData.theme.backgroundType === 'color' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500']"
+                  >
+                    Warna Solid
+                  </button>
+                  <button 
+                    @click="pageData.theme.backgroundType = 'image'"
+                    :class="['px-4 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2', pageData.theme.backgroundType === 'image' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500']"
+                  >
+                    Gambar
+                    <span class="px-1 py-0.5 rounded bg-amber-100 text-[8px] text-amber-700 leading-none">PRO</span>
+                  </button>
+                </div>
+
+                <!-- Color Options -->
+                <div v-if="pageData.theme.backgroundType === 'color'" class="flex flex-wrap gap-2">
+                  <button 
+                    v-for="color in bgColors" 
+                    :key="color.hex"
+                    @click="pageData.theme.backgroundColor = color.hex"
+                    :class="['w-10 h-10 rounded-xl border-2 transition-all', pageData.theme.backgroundColor === color.hex ? 'border-emerald-500 scale-110 shadow-lg' : 'border-transparent hover:scale-105']"
+                    :style="{ backgroundColor: color.hex }"
+                    :title="color.name"
+                  ></button>
+                </div>
+
+                <!-- Image Upload -->
+                <div v-if="pageData.theme.backgroundType === 'image'" class="space-y-3">
+                  <div v-if="!pageData.theme.backgroundImage">
+                    <input type="file" accept="image/*" @change="handleBgImageUpload" class="hidden" ref="bgImageInput">
+                    <button 
+                      @click="$refs.bgImageInput.click()"
+                      class="w-full py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all flex flex-col items-center justify-center gap-2 text-gray-500"
+                    >
+                      <i class="bi bi-image-plus text-2xl"></i>
+                      <span class="text-xs font-bold">Upload Background</span>
+                    </button>
+                  </div>
+                  <div v-else class="relative rounded-xl overflow-hidden border-2 border-gray-200 aspect-video bg-gray-50">
+                    <img :src="pageData.theme.backgroundImage" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center gap-2">
+                      <button @click="pageData.theme.backgroundImage = ''" class="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100">
+              <label class="block text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="bi bi-star-fill text-amber-500"></i>
+                Aksen Warna Halaman
+              </label>
+              <div class="flex flex-wrap gap-2">
+                <button 
+                  v-for="color in bgColors.filter(c => c.hex !== '#f9fafb')" 
+                  :key="color.hex"
+                  @click="pageData.theme.accentColor = color.hex"
+                  :class="['w-10 h-10 rounded-xl border-2 transition-all', pageData.theme.accentColor === color.hex ? 'border-emerald-500 scale-110 shadow-lg' : 'border-transparent hover:scale-105']"
+                  :style="{ backgroundColor: color.hex }"
+                  :title="color.name"
+                ></button>
+              </div>
+              <p class="text-[10px] text-gray-500 mt-2 italic">*Digunakan untuk warna hover sosmed, border profil, dll.</p>
+            </div>
           </div>
         </div>
 
@@ -132,9 +210,30 @@
             <template #item="{ element, index }">
               <div class="group relative bg-white rounded-2xl border-2 border-gray-200 hover:border-emerald-500 transition-all overflow-hidden">
                 <!-- Drag Handle Area -->
-                <div class="drag-handle bg-gray-50 border-b border-gray-200 px-4 py-2 cursor-move active:cursor-grabbing flex items-center gap-2 text-gray-500 hover:bg-gray-100 transition-colors">
-                  <i class="bi bi-grip-vertical text-lg"></i>
-                  <span class="text-xs font-medium uppercase tracking-wider">{{ getBlockTypeName(element.type) }}</span>
+                <div class="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center justify-between text-gray-500 hover:bg-gray-100 transition-colors">
+                  <div class="drag-handle cursor-move active:cursor-grabbing flex items-center gap-2 flex-1">
+                    <i class="bi bi-grip-vertical text-lg"></i>
+                    <span class="text-xs font-medium uppercase tracking-wider">{{ getBlockTypeName(element.type) }}</span>
+                  </div>
+                  
+                  <div class="flex items-center gap-1">
+                    <button 
+                      @click="moveBlock(index, -1)" 
+                      :disabled="index === 0"
+                      class="p-1 hover:text-emerald-600 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                      title="Pindah ke Atas"
+                    >
+                      <i class="bi bi-arrow-up-circle-fill text-lg"></i>
+                    </button>
+                    <button 
+                      @click="moveBlock(index, 1)" 
+                      :disabled="index === pageData.blocks.length - 1"
+                      class="p-1 hover:text-emerald-600 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                      title="Pindah ke Bawah"
+                    >
+                      <i class="bi bi-arrow-down-circle-fill text-lg"></i>
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Content Area -->
@@ -202,8 +301,13 @@
               v-for="block in availableBlocks" 
               :key="block.type"
               @click="addBlockAndClose(block.type)"
-              class="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 transition-all group"
+              class="relative flex flex-col items-center gap-3 p-4 rounded-2xl border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 transition-all group"
             >
+              <!-- Pro Badge -->
+              <div v-if="block.isPro" class="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-amber-100 text-[8px] font-black text-amber-700 uppercase tracking-tighter ring-1 ring-amber-200">
+                PRO
+              </div>
+
               <div :class="['w-14 h-14 rounded-xl flex items-center justify-center text-2xl', block.bgColor]">
                 <i :class="['bi', block.icon]"></i>
               </div>
@@ -217,44 +321,26 @@
       </div>
     </div>
 
-    <!-- Preview Modal (Mobile) -->
+    <!-- Preview Modal -->
     <div 
       v-if="showPreview"
       @click="showPreview = false"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:hidden"
+      class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4"
     >
       <div 
         @click.stop
-        class="bg-gray-900 rounded-3xl p-4 shadow-2xl w-full max-w-sm"
+        class="bg-gray-900 rounded-[3rem] p-4 shadow-2xl w-full max-w-[380px] border-[8px] border-gray-800 animate-slide-up flex flex-col max-h-[90vh]"
       >
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-bold text-white">Preview</h3>
-          <button @click="showPreview = false" class="p-2 rounded-xl hover:bg-white/10 text-white transition-colors">
+        <div class="flex items-center justify-between mb-4 px-4 flex-shrink-0">
+          <h3 class="font-bold text-white flex items-center gap-2">
+            <i class="bi bi-phone"></i>
+            Preview Halaman
+          </h3>
+          <button @click="showPreview = false" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center justify-center border border-white/10">
             <i class="bi bi-x-lg"></i>
           </button>
         </div>
-        <div class="bg-white rounded-2xl overflow-hidden" style="height: 600px; overflow-y: auto;">
-          <PagePreview :pageData="pageData" />
-        </div>
-      </div>
-    </div>
-
-    <!-- Preview Sidebar (Desktop) -->
-    <div 
-      v-if="showPreview"
-      class="hidden sm:block fixed right-6 top-24 w-80 bg-white rounded-2xl border border-gray-100 p-6 shadow-xl z-40"
-    >
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-gray-900 flex items-center gap-2">
-          <i class="bi bi-phone"></i>
-          Preview
-        </h3>
-        <button @click="showPreview = false" class="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </div>
-      <div class="bg-gray-900 rounded-3xl p-4 shadow-2xl">
-        <div class="bg-white rounded-2xl overflow-hidden" style="height: 600px; overflow-y: auto;">
+        <div class="bg-white rounded-[2rem] overflow-x-hidden overflow-y-auto flex-1 scrollbar-hide">
           <PagePreview :pageData="pageData" />
         </div>
       </div>
@@ -272,6 +358,12 @@ import LinkBlock from '@/components/blocks/LinkBlock.vue'
 import VideoBlock from '@/components/blocks/VideoBlock.vue'
 import SocialBlock from '@/components/blocks/SocialBlock.vue'
 import DividerBlock from '@/components/blocks/DividerBlock.vue'
+import SlideshowBlock from '@/components/blocks/SlideshowBlock.vue'
+import ProfileBlock from '@/components/blocks/ProfileBlock.vue'
+import AccordionBlock from '@/components/blocks/AccordionBlock.vue'
+import CountdownBlock from '@/components/blocks/CountdownBlock.vue'
+import AlertBlock from '@/components/blocks/AlertBlock.vue'
+import GridBlock from '@/components/blocks/GridBlock.vue'
 import PagePreview from '@/components/PagePreview.vue'
 
 const router = useRouter()
@@ -283,24 +375,56 @@ const pageData = ref({
   slug: '',
   description: '',
   seoImage: '',
+  theme: {
+    backgroundType: 'color', // 'color' or 'image'
+    backgroundColor: '#f9fafb', // Gray 50
+    backgroundImage: '',
+    accentColor: '#059669' // Emerald 600
+  },
   blocks: []
 })
 
+const bgColors = [
+  { name: 'Gray 50', hex: '#f9fafb' },
+  { name: 'Slate 900', hex: '#0f172a' },
+  { name: 'Blue 600', hex: '#2563eb' },
+  { name: 'Emerald 600', hex: '#059669' },
+  { name: 'Rose 600', hex: '#e11d48' },
+  { name: 'Amber 500', hex: '#f59e0b' },
+  { name: 'Indigo 600', hex: '#4f46e5' },
+  { name: 'Violet 600', hex: '#7c3aed' },
+  { name: 'Pink 500', hex: '#ec4899' },
+]
+
 const availableBlocks = [
-  { type: 'text', name: 'Text', description: 'Teks atau paragraf', icon: 'bi-text-left', bgColor: 'bg-blue-50 text-blue-600' },
-  { type: 'link', name: 'Link Button', description: 'Tombol link', icon: 'bi-link-45deg', bgColor: 'bg-emerald-50 text-emerald-600' },
-  { type: 'image', name: 'Image', description: 'Gambar atau foto', icon: 'bi-image', bgColor: 'bg-purple-50 text-purple-600' },
-  { type: 'video', name: 'Video', description: 'Embed video', icon: 'bi-play-circle', bgColor: 'bg-red-50 text-red-600' },
-  { type: 'social', name: 'Social Links', description: 'Ikon sosial media', icon: 'bi-share', bgColor: 'bg-pink-50 text-pink-600' },
-  { type: 'divider', name: 'Divider', description: 'Garis pemisah', icon: 'bi-dash-lg', bgColor: 'bg-gray-50 text-gray-600' },
+  { type: 'profile', name: 'Profile Header', description: 'Foto, Nama & Bio', icon: 'bi-person-badge', bgColor: 'bg-indigo-50 text-indigo-600', isPro: false },
+  { type: 'text', name: 'Text', description: 'Teks atau paragraf', icon: 'bi-text-left', bgColor: 'bg-blue-50 text-blue-600', isPro: false },
+  { type: 'link', name: 'Link Button', description: 'Tombol link', icon: 'bi-link-45deg', bgColor: 'bg-emerald-50 text-emerald-600', isPro: false },
+  { type: 'image', name: 'Image', description: 'Gambar atau foto', icon: 'bi-image', bgColor: 'bg-purple-50 text-purple-600', isPro: false },
+  { type: 'social', name: 'Social Links', description: 'Ikon sosial media', icon: 'bi-share', bgColor: 'bg-pink-50 text-pink-600', isPro: false },
+  { type: 'divider', name: 'Divider', description: 'Garis pemisah', icon: 'bi-dash-lg', bgColor: 'bg-gray-50 text-gray-600', isPro: false },
+  
+  // Pro Blocks
+  { type: 'grid', name: 'Grid Layout', description: '2 Kolom (Bebas Block)', icon: 'bi-grid-fill', bgColor: 'bg-cyan-50 text-cyan-600', isPro: true },
+  { type: 'alert', name: 'Alert / Notice', description: 'Kotak pengumuman', icon: 'bi-megaphone-fill', bgColor: 'bg-yellow-50 text-yellow-600', isPro: true },
+  { type: 'countdown', name: 'Countdown', description: 'Hitung mundur', icon: 'bi-stopwatch-fill', bgColor: 'bg-rose-50 text-rose-600', isPro: true },
+  { type: 'video', name: 'Video', description: 'Embed video', icon: 'bi-play-circle', bgColor: 'bg-red-50 text-red-600', isPro: true },
+  { type: 'slideshow', name: 'Slideshow', description: 'Galeri foto geser', icon: 'bi-images', bgColor: 'bg-orange-50 text-orange-600', isPro: true },
+  { type: 'accordion', name: 'FAQ / Accordion', description: 'Daftar pertanyaan', icon: 'bi-list-ul', bgColor: 'bg-teal-50 text-teal-600', isPro: true },
 ]
 
 const getBlockComponent = (type) => {
   const components = {
     text: TextBlock,
-    image: ImageBlock,
     link: LinkBlock,
+    grid: GridBlock,
+    image: ImageBlock,
+    alert: AlertBlock,
+    countdown: CountdownBlock,
     video: VideoBlock,
+    profile: ProfileBlock,
+    slideshow: SlideshowBlock,
+    accordion: AccordionBlock,
     social: SocialBlock,
     divider: DividerBlock,
   }
@@ -328,9 +452,15 @@ const addBlockAndClose = (type) => {
 
 const getDefaultBlockData = (type) => {
   const defaults = {
-    text: { content: 'Tulis teks di sini...', align: 'left' },
-    link: { title: 'Link Title', url: 'https://example.com', style: 'filled' },
+    text: { content: 'Tulis teks di sini...', align: 'left', textColor: '#0f172a', fontSize: 'md', fontWeight: 'normal', isItalic: false },
+    link: { title: 'Link Title', url: 'https://example.com', style: 'filled', backgroundColor: '#059669', textColor: '#ffffff' },
+    grid: { items: [] },
     image: { url: '', alt: '', size: 'medium' },
+    alert: { content: 'Pesan pengumuman penting!', type: 'info' },
+    countdown: { title: 'Segera Hadir', targetDate: '', style: 'cards' },
+    slideshow: { images: [] },
+    profile: { avatar: '', name: '', bio: '', align: 'center' },
+    accordion: { items: [] },
     video: { url: '', platform: 'youtube' },
     social: { links: [] },
     divider: { style: 'solid', color: '#e5e7eb' },
@@ -349,6 +479,17 @@ const duplicateBlock = (index) => {
 
 const deleteBlock = (index) => {
   pageData.value.blocks.splice(index, 1)
+}
+
+const moveBlock = (index, direction) => {
+  const newIndex = index + direction
+  if (newIndex >= 0 && newIndex < pageData.value.blocks.length) {
+    const blocks = [...pageData.value.blocks]
+    const temp = blocks[index]
+    blocks[index] = blocks[newIndex]
+    blocks[newIndex] = temp
+    pageData.value.blocks = blocks
+  }
 }
 
 const savePage = () => {
@@ -377,6 +518,27 @@ const handleSeoImageUpload = (event) => {
   const reader = new FileReader()
   reader.onload = (e) => {
     pageData.value.seoImage = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const handleBgImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Ukuran file terlalu besar! Maksimal 2MB.')
+    return
+  }
+
+  if (!file.type.startsWith('image/')) {
+    alert('File harus berupa gambar!')
+    return
+  }
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    pageData.value.theme.backgroundImage = e.target.result
   }
   reader.readAsDataURL(file)
 }

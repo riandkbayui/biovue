@@ -3,25 +3,46 @@
     :href="data?.url || '#'" 
     target="_blank"
     :class="[
-      'block w-full py-3 px-6 rounded-xl font-medium text-center transition-all',
-      getStyleClasses(data?.style)
+      'block w-full py-3 px-6 rounded-xl font-bold text-center transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm',
     ]"
+    :style="linkStyle"
   >
     {{ data?.title || 'Link Title' }}
   </a>
 </template>
 
 <script setup>
-defineProps({
-  data: Object
+import { computed } from 'vue'
+
+const props = defineProps({
+  data: Object,
+  theme: Object
 })
 
-const getStyleClasses = (style) => {
-  const styles = {
-    filled: 'bg-emerald-600 text-white hover:bg-emerald-700',
-    outline: 'border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50',
-    minimal: 'text-emerald-600 hover:bg-emerald-50'
+const linkStyle = computed(() => {
+  const style = props.data?.style || 'filled'
+  const bgColor = props.data?.backgroundColor || props.theme?.accentColor || '#059669'
+  const textColor = props.data?.textColor || '#ffffff'
+
+  if (style === 'outline') {
+    return {
+      border: `2px solid ${bgColor}`,
+      color: bgColor,
+      backgroundColor: 'transparent'
+    }
   }
-  return styles[style] || styles.filled
-}
+
+  if (style === 'minimal') {
+    return {
+      color: bgColor,
+      backgroundColor: 'transparent'
+    }
+  }
+
+  // Default: filled
+  return {
+    backgroundColor: bgColor,
+    color: textColor
+  }
+})
 </script>

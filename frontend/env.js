@@ -3,6 +3,8 @@ export const env = {
   description: 'Aplikasi Page Builder dengan Integrasi CodeIgniter 4 dan Vue.js',
   icon: '/favicon.ico', // Sesuaikan dengan path icon yang valid
   themeColor: '#10B981', // Emerald-500 sebagai representasi warna hijau utama
+  apiUrl: 'http://localhost:8080/api',
+  assetUrl: 'http://localhost:8080',
   
   seo: {
     baseTitle: 'Aksibio - Page Builder Terintegrasi',
