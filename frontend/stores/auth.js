@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import api from '@/utils/axios'
 
 const createDefaultUser = () => ({
 	id: null,
 	name: '',
 	username: '',
 	email: '',
-	group: 'member',
+	role: 'member',
 	photo: '',
-	plan: 'free',
 	created_at: null
 })
 
@@ -23,7 +23,6 @@ export const useAuthStore = defineStore('auth', () => {
 
 	// Actions
 	const setAuth = (newUserData, newToken) => {
-		// Merge dengan default user untuk memastikan semua field ada
 		user.value = { ...createDefaultUser(), ...newUserData }
 		token.value = newToken
 
@@ -44,6 +43,61 @@ export const useAuthStore = defineStore('auth', () => {
 		localStorage.setItem('user', JSON.stringify(user.value))
 	}
 
+    // API Actions
+    const login = async (credential, password) => {
+        try {
+            const response = await api.post('/auth/login', { credential, password })
+            const { data, success } = response.data
+            
+            if (success) {
+                setAuth(data.user, data.token)
+                return { success: true }
+            }
+            return { success: false, message: response.data.message }
+        } catch (error) {
+            return { 
+                success: false, 
+                message: error.response?.data?.messages?.error || error.response?.data?.message || 'Terjadi kesalahan saat login.' 
+            }
+        }
+    }
+
+    const register = async (formData) => {
+        try {
+            const response = await api.post('/auth/register', formData)
+            return response.data // { success: true/false, message: ... }
+        } catch (error) {
+            // CI4 validation errors usually come in `messages` object inside response
+            const errors = error.response?.data?.messages || {}
+            // If it's a simple message
+            const message = error.response?.data?.messages?.error || error.response?.data?.message || 'Gagal mendaftar.'
+            
+            return { success: false, message, errors }
+        }
+    }
+
+    const logout = async () => {
+        try {
+            await api.post('/auth/logout')
+        } catch (error) {
+            console.error('Logout failed on server', error)
+        } finally {
+            clearAuth()
+        }
+    }
+
+    const fetchUser = async () => {
+        if (!token.value) return
+        try {
+            const response = await api.get('/auth/me')
+            const { user: backendUser } = response.data
+            updateUser(backendUser)
+        } catch (error) {
+            console.error('Fetch user failed', error)
+            clearAuth()
+        }
+    }
+
 	return {
 		user,
 		token,
@@ -51,6 +105,10 @@ export const useAuthStore = defineStore('auth', () => {
 		userData,
 		setAuth,
 		clearAuth,
-		updateUser
+		updateUser,
+        login,
+        register,
+        logout,
+        fetchUser
 	}
 })

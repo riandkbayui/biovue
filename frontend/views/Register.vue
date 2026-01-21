@@ -22,6 +22,11 @@
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
+        
+        <div v-if="errorMsg" class="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline">{{ errorMsg }}</span>
+        </div>
+
         <form class="space-y-6" @submit.prevent="handleRegister">
             
           <div>
@@ -30,6 +35,17 @@
             </label>
             <div class="mt-1">
               <Input id="name" name="name" type="text" autocomplete="name" required v-model="name" placeholder="John Doe" />
+              <p v-if="validationErrors.name" class="text-red-500 text-xs mt-1">{{ validationErrors.name }}</p>
+            </div>
+          </div>
+
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700">
+              Username
+            </label>
+            <div class="mt-1">
+              <Input id="username" name="username" type="text" autocomplete="username" required v-model="username" placeholder="johndoe" />
+              <p v-if="validationErrors.username" class="text-red-500 text-xs mt-1">{{ validationErrors.username }}</p>
             </div>
           </div>
 
@@ -39,6 +55,7 @@
             </label>
             <div class="mt-1">
               <Input id="email" name="email" type="email" autocomplete="email" required v-model="email" placeholder="john@example.com" />
+              <p v-if="validationErrors.email" class="text-red-500 text-xs mt-1">{{ validationErrors.email }}</p>
             </div>
           </div>
 
@@ -69,8 +86,8 @@
           </div>
 
           <div>
-            <Button type="submit" variant="primary" class="w-full justify-center">
-              Daftar Sekarang
+            <Button type="submit" variant="primary" class="w-full justify-center" :disabled="isLoading">
+              {{ isLoading ? 'Mendaftar...' : 'Daftar Sekarang' }}
             </Button>
           </div>
         </form>
@@ -109,21 +126,56 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import Input from '@/components/Input.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 import Button from '@/components/Button.vue'
 
 const name = ref('')
+const username = ref('')
 const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
+const errorMsg = ref('')
+const validationErrors = ref({})
+const isLoading = ref(false)
 
-const handleRegister = () => {
-    // Basic validation
+const router = useRouter()
+const authStore = useAuthStore()
+
+const handleRegister = async () => {
+    // Basic client-side validation
     if (password.value !== passwordConfirm.value) {
-        alert('Password tidak cocok!')
+        errorMsg.value = 'Password tidak cocok!'
         return
     }
-    console.log('Register logic here')
+
+    isLoading.value = true
+    errorMsg.value = ''
+    validationErrors.value = {}
+
+    const formData = {
+        name: name.value,
+        username: username.value,
+        email: email.value,
+        password: password.value,
+        confirm_password: passwordConfirm.value
+    }
+
+    const result = await authStore.register(formData)
+    
+    isLoading.value = false
+
+    if (result.success) {
+        // Redirect to login or auto-login
+        // For now, redirect to login with query param
+        router.push('/login?registered=true')
+    } else {
+        errorMsg.value = result.message
+        if (result.errors) {
+            validationErrors.value = result.errors
+        }
+    }
 }
 </script>

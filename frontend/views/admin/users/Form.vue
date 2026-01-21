@@ -1,132 +1,121 @@
 <template>
-  <div class="space-y-6 animate-fade-in max-w-2xl mx-auto">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ isEditing ? 'Edit Pengguna' : 'Tambah Pengguna Baru' }}</h1>
-            <p class="text-gray-500 mt-1">{{ isEditing ? 'Perbarui informasi pengguna' : 'Tambahkan pengguna baru ke sistem' }}</p>
-        </div>
-        <Button variant="secondary" @click="$router.push({ name: 'admin-users' })">
-            <i class="bi bi-arrow-left mr-2"></i> Kembali
-        </Button>
+  <div class="max-w-2xl mx-auto animate-fade-in">
+    <div class="mb-8">
+      <router-link to="/admin/users" class="text-gray-500 hover:text-emerald-600 flex items-center gap-2 mb-4 transition-colors">
+        <i class="bi bi-arrow-left"></i> Kembali ke Daftar Pengguna
+      </router-link>
+      <h2 class="text-2xl font-bold text-gray-900">{{ isEditMode ? 'Edit Pengguna' : 'Tambah Pengguna Baru' }}</h2>
     </div>
 
-    <Card>
-      <form @submit.prevent="saveUser" class="space-y-6">
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
+      <form @submit.prevent="handleSubmit" class="space-y-6">
+        
+        <div v-if="error" class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+            {{ formatError(error) }}
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="md:col-span-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                <Input v-model="userForm.name" placeholder="Contoh: John Doe" required />
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                <input v-model="form.name" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
             </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <input v-model="form.username" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
+            </div>
+        </div>
 
-            <div class="md:col-span-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                <Input v-model="userForm.username" placeholder="Contoh: johndoe123" required />
-            </div>
-            
-            <div class="md:col-span-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <Input type="email" v-model="userForm.email" placeholder="Contoh: john@example.com" required />
-            </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <input v-model="form.email" type="email" required class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
+        </div>
 
-            <div class="md:col-span-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select v-model="userForm.status" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white">
-                    <option value="Aktif">Aktif</option>
-                    <option value="Tidak Aktif">Tidak Aktif</option>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <select v-model="form.role" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-white">
+                    <option value="member">Member</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select v-model="form.status" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-white">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                 </select>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
-            <div class="md:col-span-2" v-if="isEditing">
-                <p class="text-xs text-gray-500 bg-blue-50 p-2 rounded border border-blue-100">
-                    <i class="bi bi-info-circle mr-1"></i> Biarkan kosong jika tidak ingin mengubah kata sandi.
-                </p>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Sandi</label>
-                <PasswordInput v-model="userForm.password" placeholder="********" :required="!isEditing" />
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Sandi</label>
-                <PasswordInput v-model="userForm.confirmPassword" placeholder="********" :required="!isEditing" />
-            </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                {{ isEditMode ? 'Password Baru (Kosongkan jika tidak diubah)' : 'Password' }}
+            </label>
+            <input v-model="form.password" type="password" :required="!isEditMode" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
         </div>
 
-        <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
-            <Button type="button" variant="secondary" @click="$router.push({ name: 'admin-users' })">Batal</Button>
-            <Button type="submit" variant="primary">
-                <i class="bi bi-save mr-2"></i> {{ isEditing ? 'Simpan Perubahan' : 'Simpan Pengguna' }}
-            </Button>
+        <div class="pt-6 border-t border-gray-100 flex justify-end gap-3">
+            <button type="button" @click="router.back()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors">
+                Batal
+            </button>
+            <button type="submit" :disabled="isLoading" class="px-8 py-2 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors flex items-center gap-2">
+                <span v-if="isLoading" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                {{ isEditMode ? 'Simpan Perubahan' : 'Buat Pengguna' }}
+            </button>
         </div>
       </form>
-    </Card>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import Card from '../../../components/Card.vue';
-import Button from '../../../components/Button.vue';
-import Input from '../../../components/Input.vue';
-import PasswordInput from '../../../components/PasswordInput.vue';
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAdminUsers } from '@/composables/useAdminUsers'
 
-const route = useRoute();
-const router = useRouter();
+const router = useRouter()
+const route = useRoute()
+const { fetchUser, createUser, updateUser, isLoading, error } = useAdminUsers()
 
-const isEditing = computed(() => !!route.params.id);
+const isEditMode = computed(() => !!route.params.id)
 
-const userForm = reactive({
-  name: '',
-  username: '',
-  email: '',
-  status: 'Aktif',
-  password: '',
-  confirmPassword: ''
-});
+const form = reactive({
+    name: '',
+    username: '',
+    email: '',
+    role: 'member',
+    status: 'active',
+    password: ''
+})
 
-// Mock data fetch for editing
-onMounted(() => {
-  if (isEditing.value) {
-    const mockId = route.params.id;
-    console.log(`Fetching data for user ID: ${mockId}`);
-    
-    // Pre-fill with dummy data
-    if (mockId == 1) {
-        userForm.name = 'Alex Johnson';
-        userForm.username = 'alexj';
-        userForm.email = 'alex@example.com';
+onMounted(async () => {
+    if (isEditMode.value) {
+        try {
+            const user = await fetchUser(route.params.id)
+            form.name = user.name
+            form.username = user.username
+            form.email = user.email
+            form.role = user.role
+            form.status = user.status
+        } catch (err) {
+            router.push('/admin/users')
+        }
     }
-  }
-});
+})
 
-const saveUser = () => {
-  // Validate basic info
-  if (!userForm.name || !userForm.username || !userForm.email) {
-    alert('Mohon lengkapi semua field yang wajib diisi.');
-    return;
-  }
+const handleSubmit = async () => {
+    try {
+        if (isEditMode.value) {
+            await updateUser(route.params.id, form)
+        } else {
+            await createUser(form)
+        }
+        router.push('/admin/users')
+    } catch (err) {}
+}
 
-  // Validate password for new user or if password field is filled
-  if (!isEditing.value || userForm.password) {
-      if (userForm.password.length < 6) {
-          alert('Sandi minimal 6 karakter.');
-          return;
-      }
-      if (userForm.password !== userForm.confirmPassword) {
-          alert('Konfirmasi sandi tidak cocok.');
-          return;
-      }
-  }
-
-  // Simulate API call
-  console.log('Saving user:', {
-      ...userForm,
-      password: userForm.password || '(unchanged)'
-  });
-  
-  // Redirect back to list
-  router.push({ name: 'admin-users' });
-};
+const formatError = (err) => {
+    if (typeof err === 'object') return Object.values(err).join(', ')
+    return err
+}
 </script>

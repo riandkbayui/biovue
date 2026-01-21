@@ -63,21 +63,43 @@
 
       <!-- Recent Pages -->
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
-        <h3 class="text-xl font-bold text-gray-900 mb-6">Halaman Terbaru</h3>
-        <div class="space-y-4">
-            <div v-for="i in 3" :key="i" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-pointer">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Halaman Terbaru</h3>
+            <router-link to="/member/pages" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">Lihat Semua</router-link>
+        </div>
+        
+        <div v-if="isLoading" class="flex justify-center py-8">
+            <span class="text-gray-400 text-sm">Memuat data...</span>
+        </div>
+
+        <div v-else-if="pages.length > 0" class="space-y-4">
+            <div v-for="page in recentPages" :key="page.id" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-pointer">
                 <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold flex-shrink-0">
-                    P{{ i }}
+                    {{ page.title.substring(0, 2).toUpperCase() }}
                 </div>
-                <div class="flex-1">
-                    <p class="font-bold text-gray-900 text-sm">aksibio.com/page{{ i }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">Dibuat 2 jam yang lalu</p>
+                <div class="flex-1 overflow-hidden">
+                    <p class="font-bold text-gray-900 text-sm truncate">{{ page.title }}</p>
+                    <a :href="'/' + page.slug" target="_blank" class="text-xs text-emerald-600 hover:underline mt-0.5 truncate block">
+                        /{{ page.slug }}
+                    </a>
                 </div>
-                <i class="bi bi-chevron-right text-gray-300"></i>
+                <router-link :to="'/member/pages/edit/' + page.id" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-emerald-100 text-gray-400 hover:text-emerald-600 transition-colors">
+                    <i class="bi bi-pencil-fill text-xs"></i>
+                </router-link>
             </div>
-            <button class="w-full py-3 text-sm font-bold text-emerald-600 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition-colors mt-4">
-                Lihat Semua Halaman
-            </button>
+            <router-link to="/member/pages/create" class="w-full py-3 flex items-center justify-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition-colors mt-4">
+                <i class="bi bi-plus-lg"></i> Buat Halaman Baru
+            </router-link>
+        </div>
+
+        <div v-else class="text-center py-8">
+            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="bi bi-file-earmark-plus text-2xl text-gray-400"></i>
+            </div>
+            <p class="text-gray-500 text-sm mb-4">Belum ada halaman.</p>
+            <router-link to="/member/pages/create" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
+                Buat Pertama
+            </router-link>
         </div>
       </div>
     </div>
@@ -85,7 +107,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { usePages } from '@/composables/usePages'
 import {
   Chart as ChartJS,
   Title,
@@ -99,6 +122,17 @@ import {
   Filler
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
+
+// Use Pages Composable
+const { pages, fetchPages, isLoading } = usePages()
+
+onMounted(() => {
+    fetchPages()
+})
+
+const recentPages = computed(() => {
+    return pages.value.slice(0, 3)
+})
 
 // Register ChartJS components
 ChartJS.register(

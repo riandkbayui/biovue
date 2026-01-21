@@ -7,18 +7,48 @@ const api = axios.create({
 	baseURL: env.apiUrl,
 	timeout: 10000,
 	headers: {
-		'Content-Type': 'application/json',
 		'Accept': 'application/json'
 	}
 })
 
-// Request Interceptor: Tambahkan Bearer Token dari LocalStorage
+// Helper untuk konversi objek ke FormData (mendukung nested object/array)
+const toFormData = (obj, form, namespace) => {
+	const fd = form || new FormData()
+	let formKey
+
+	for (const property in obj) {
+		if (Object.prototype.hasOwnProperty.call(obj, property)) {
+			if (namespace) {
+				formKey = namespace + '[' + property + ']'
+			} else {
+				formKey = property
+			}
+
+			// Jika property adalah objek dan bukan File, lakukan rekursi
+			if (typeof obj[property] === 'object' && !(obj[property] instanceof File) && obj[property] !== null) {
+				toFormData(obj[property], fd, formKey)
+			} else {
+				// Jika null, kirim string kosong atau abaikan (tergantung kebutuhan backend)
+				fd.append(formKey, obj[property] === null ? '' : obj[property])
+			}
+		}
+	}
+	return fd
+}
+
+// Request Interceptor: Tambahkan Bearer Token & Konversi ke FormData untuk POST
 api.interceptors.request.use(
 	(config) => {
 		const token = localStorage.getItem('token')
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`
 		}
+
+		// Otomatis ubah POST data menjadi FormData
+		if (config.method === 'post' && config.data && !(config.data instanceof FormData)) {
+			config.data = toFormData(config.data)
+		}
+
 		return config
 	},
 	(error) => {

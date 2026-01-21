@@ -64,47 +64,49 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useUpload } from '@/composables/useUpload'
 
 const props = defineProps({
   modelValue: Object
 })
 
 const emit = defineEmits(['update:modelValue', 'update'])
+const { uploadImage, isUploading } = useUpload()
 
 const imageInput = ref(null)
 
 const localData = ref({
-  images: props.modelValue?.data?.images || []
+  images: props.modelValue?.images || []
 })
 
-const handleImageUpload = (event) => {
+const handleImageUpload = async (event) => {
   const files = Array.from(event.target.files)
   if (!files.length) return
 
-  files.forEach(file => {
+  for (const file of files) {
     // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       alert(`File ${file.name} terlalu besar! Maksimal 2MB.`)
-      return
+      continue
     }
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
       alert(`File ${file.name} bukan gambar!`)
-      return
+      continue
     }
 
-    // Convert to base64
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      localData.value.images.push({
-        url: e.target.result,
-        caption: ''
-      })
-      emitUpdate()
+    try {
+        const result = await uploadImage(file, 'slideshow')
+        localData.value.images.push({
+            url: result.url,
+            caption: ''
+        })
+        emitUpdate()
+    } catch (err) {
+        alert(`Gagal mengunggah ${file.name}: ` + (err.response?.data?.message || 'Terjadi kesalahan'))
     }
-    reader.readAsDataURL(file)
-  })
+  }
 
   // Reset input
   event.target.value = ''
@@ -126,12 +128,12 @@ const moveImage = (index, direction) => {
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
-    localData.value = { ...newVal.data }
+  if (newVal) {
+    localData.value = { ...newVal }
   }
 }, { deep: true })
 </script>

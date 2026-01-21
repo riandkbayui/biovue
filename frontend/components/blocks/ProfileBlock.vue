@@ -67,18 +67,20 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useUpload } from '@/composables/useUpload'
 
 const props = defineProps({
   modelValue: Object
 })
 
 const emit = defineEmits(['update:modelValue', 'update'])
+const { uploadImage, isUploading } = useUpload()
 
 const localData = ref({
-  avatar: props.modelValue?.data?.avatar || '',
-  name: props.modelValue?.data?.name || '',
-  bio: props.modelValue?.data?.bio || '',
-  align: props.modelValue?.data?.align || 'center'
+  avatar: props.modelValue?.avatar || '',
+  name: props.modelValue?.name || '',
+  bio: props.modelValue?.bio || '',
+  align: props.modelValue?.align || 'center'
 })
 
 const setAlign = (align) => {
@@ -86,7 +88,7 @@ const setAlign = (align) => {
   emitUpdate()
 }
 
-const handleAvatarUpload = (event) => {
+const handleAvatarUpload = async (event) => {
   const file = event.target.files[0]
   if (!file) return
 
@@ -102,22 +104,22 @@ const handleAvatarUpload = (event) => {
     return
   }
 
-  // Convert to base64
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    localData.value.avatar = e.target.result
-    emitUpdate()
+  try {
+      const result = await uploadImage(file, 'avatars')
+      localData.value.avatar = result.url
+      emitUpdate()
+  } catch (err) {
+      alert('Gagal mengunggah foto: ' + (err.response?.data?.message || 'Terjadi kesalahan'))
   }
-  reader.readAsDataURL(file)
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
-    localData.value = { ...newVal.data }
+  if (newVal) {
+    localData.value = { ...newVal }
   }
 }, { deep: true })
 </script>

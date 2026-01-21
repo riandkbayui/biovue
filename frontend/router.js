@@ -21,7 +21,15 @@ const routes = [
     children: [
       { path: '', redirect: '/member/dashboard' },
       { path: 'dashboard', name: 'member-dashboard', component: () => import('@/views/member/Dashboard.vue') },
-      { path: 'my-pages', name: 'member-pages', component: () => import('@/views/member/MyPages.vue') },
+      
+      // Pages Management
+      { path: 'pages', name: 'member-pages', component: () => import('@/views/member/MyPages.vue') },
+      { path: 'pages/create', name: 'member-pages-create', component: () => import('@/views/member/pages/Create.vue') },
+      { path: 'pages/edit/:id', name: 'member-pages-edit', component: () => import('@/views/member/pages/Edit.vue') },
+      
+      // Redirect legacy route
+      { path: 'my-pages', redirect: '/member/pages' },
+
       { path: 'statistics', name: 'member-stats', component: () => import('@/views/member/Statistics.vue') },
       { path: 'bills', name: 'member-bills', component: () => import('@/views/member/Bills.vue') },
       { path: 'tutorial', name: 'member-tutorial', component: () => import('@/views/member/Tutorial.vue') },
@@ -58,6 +66,8 @@ const routes = [
       { path: 'settings', name: 'admin-settings', component: () => import('@/views/admin/Settings.vue') },
     ]
   },
+  // Public Page (Must be at the end)
+  { path: '/:slug', name: 'public-page', component: () => import('@/views/PublicPage.vue') },
 ]
 
 const router = createRouter({

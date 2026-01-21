@@ -22,13 +22,18 @@
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
+        
+        <div v-if="errorMsg" class="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline">{{ errorMsg }}</span>
+        </div>
+
         <form class="space-y-6" @submit.prevent="handleLogin">
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700">
-              Email address
+              Email atau Username
             </label>
             <div class="mt-1">
-              <Input id="email" name="email" type="email" autocomplete="email" required v-model="email" placeholder="john@example.com" />
+              <Input id="email" name="email" type="text" autocomplete="username" required v-model="email" placeholder="john@example.com atau username" />
             </div>
           </div>
 
@@ -58,8 +63,8 @@
           </div>
 
           <div>
-            <Button type="submit" variant="primary" class="w-full justify-center">
-              Masuk
+            <Button type="submit" variant="primary" class="w-full justify-center" :disabled="isLoading">
+              {{ isLoading ? 'Memproses...' : 'Masuk' }}
             </Button>
           </div>
         </form>
@@ -99,16 +104,34 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import Input from '@/components/Input.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 import Button from '@/components/Button.vue'
 
-const email = ref('')
+const email = ref('') // Ini bisa berupa email atau username
 const password = ref('')
+const errorMsg = ref('')
+const isLoading = ref(false)
 const router = useRouter()
+const authStore = useAuthStore()
 
-const handleLogin = () => {
-    // Mock login logic
-    router.push('/member/dashboard')
+const handleLogin = async () => {
+    isLoading.value = true
+    errorMsg.value = ''
+    
+    const result = await authStore.login(email.value, password.value)
+    
+    isLoading.value = false
+    
+    if (result.success) {
+        if (authStore.user.role === 'admin') {
+           router.push('/admin/dashboard')
+        } else {
+           router.push('/member/dashboard')
+        }
+    } else {
+        errorMsg.value = result.message
+    }
 }
 </script>

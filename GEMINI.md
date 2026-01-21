@@ -112,6 +112,8 @@ ATURAN WAJIB:
 18. Jika ada lebih dari satu pendekatan, jelaskan trade-off masing-masing secara singkat.
 19. Utamakan memakai tailwind css daripada menulis style.css jika memungkinkan.
 20. Tambahkan placeholder ke setiap inputan html.
+21. Controller HANYA bertugas sebagai validasi input form dan sanitasi data. Segala logic bisnis WAJIB diletakkan di direktori services dengan pola: `App/Services/Module/Module.php` (contoh: `App/Services/Users/Users.php`).
+22. Vue Views HANYA menangani UI/Template. Logic bisnis frontend (API calls, state management kompleks) WAJIB dipisahkan ke direktori `frontend/composables`. Gunakan pola Composition API (`useFeature`).
 
 JIKA RAGU:
 - Tanyakan klarifikasi

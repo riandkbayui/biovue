@@ -14,7 +14,7 @@ class UsersModel extends Model
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'name', 'email', 'username', 'password', 'group', 'photo', 'status', 'email_verified_at',
+        'name', 'email', 'username', 'password', 'role', 'photo', 'status', 'email_verified_at',
         'created_by', 'updated_by', 'deleted_by'
     ];
 

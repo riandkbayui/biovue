@@ -72,19 +72,21 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useUpload } from '@/composables/useUpload'
 
 const props = defineProps({
   modelValue: Object
 })
 
 const emit = defineEmits(['update:modelValue', 'update'])
+const { uploadImage, isUploading } = useUpload()
 
 const imageInput = ref(null)
 
 const localData = ref({
-  url: props.modelValue?.data?.url || '',
-  alt: props.modelValue?.data?.alt || '',
-  size: props.modelValue?.data?.size || 'medium'
+  url: props.modelValue?.url || '',
+  alt: props.modelValue?.alt || '',
+  size: props.modelValue?.size || 'medium'
 })
 
 const setSize = (size) => {
@@ -92,7 +94,7 @@ const setSize = (size) => {
   emitUpdate()
 }
 
-const handleImageUpload = (event) => {
+const handleImageUpload = async (event) => {
   const file = event.target.files[0]
   if (!file) return
 
@@ -110,13 +112,13 @@ const handleImageUpload = (event) => {
     return
   }
 
-  // Convert to base64
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    localData.value.url = e.target.result
-    emitUpdate()
+  try {
+      const result = await uploadImage(file, 'blocks')
+      localData.value.url = result.url
+      emitUpdate()
+  } catch (err) {
+      alert('Gagal mengunggah gambar: ' + (err.response?.data?.message || 'Terjadi kesalahan'))
   }
-  reader.readAsDataURL(file)
 }
 
 const removeImage = () => {
@@ -129,12 +131,12 @@ const removeImage = () => {
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
-    localData.value = { ...newVal.data }
+  if (newVal) {
+    localData.value = { ...newVal }
   }
 }, { deep: true })
 </script>

@@ -1,28 +1,30 @@
 <template>
   <div 
-    class="min-h-full pl-6 pr-8 py-6 pb-20 space-y-4 transition-all duration-500"
+    class="min-h-full pl-6 pr-8 py-6 pb-20 space-y-6 transition-all duration-500"
     :style="bgStyle"
   >
-    <div v-if="!hasProfileBlock" class="text-center mb-8">
+    <!-- Default Header (Hanya muncul jika tidak ada Profile Block) -->
+    <div v-if="!hasProfileBlock" class="text-center mb-8 animate-fade-in">
       <div 
-        class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-emerald-500/20"
+        class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-emerald-500/20 ring-4 ring-white"
         :style="{ 
-          backgroundColor: pageData.theme?.accentColor || '#059669',
-          boxShadow: `0 10px 15px -3px ${pageData.theme?.accentColor}33` 
+          backgroundColor: pageData?.theme?.accentColor || '#059669',
+          boxShadow: `0 10px 15px -3px ${pageData?.theme?.accentColor}33` 
         }"
       >
-        {{ pageData.title?.charAt(0) || 'A' }}
+        {{ (pageData?.title || 'A').charAt(0) }}
       </div>
-      <h1 class="text-xl font-bold text-gray-900">{{ pageData.title || 'Halaman Baru' }}</h1>
-      <p class="text-sm text-gray-500 mt-1">aksibio.com/{{ pageData.slug || 'username' }}</p>
+      <h1 class="text-xl font-bold text-gray-900 leading-tight">{{ pageData?.title || 'Halaman Baru' }}</h1>
+      <p class="text-sm text-gray-500 mt-1">aksibio.com/{{ pageData?.slug || 'username' }}</p>
     </div>
 
+    <!-- Blocks List -->
     <div class="space-y-4">
-      <div v-for="block in pageData.blocks" :key="block.id">
+      <div v-for="block in safeBlocks" :key="block.id" class="animate-slide-up">
         <component 
           :is="getPreviewComponent(block.type)" 
-          :data="block.data" 
-          :theme="pageData.theme"
+          :data="block.content" 
+          :theme="pageData?.theme"
         />
       </div>
     </div>
@@ -30,7 +32,7 @@
 </template>
 
 <script setup>
-import { defineProps, computed } from 'vue'
+import { computed } from 'vue'
 import TextPreview from '@/components/previews/TextPreview.vue'
 import LinkPreview from '@/components/previews/LinkPreview.vue'
 import ImagePreview from '@/components/previews/ImagePreview.vue'
@@ -45,15 +47,20 @@ import CountdownPreview from '@/components/previews/CountdownPreview.vue'
 import GridPreview from '@/components/previews/GridPreview.vue'
 
 const props = defineProps({
-  pageData: Object
+  pageData: Object,
+  blocks: Array
+})
+
+const safeBlocks = computed(() => {
+  return Array.isArray(props.blocks) ? props.blocks : []
 })
 
 const hasProfileBlock = computed(() => {
-  return props.pageData.blocks.some(b => b.type === 'profile')
+  return safeBlocks.value.some(b => b.type === 'profile')
 })
 
 const bgStyle = computed(() => {
-  const theme = props.pageData.theme || {}
+  const theme = props.pageData?.theme || {}
   if (theme.backgroundType === 'image' && theme.backgroundImage) {
     return {
       backgroundImage: `url(${theme.backgroundImage})`,
