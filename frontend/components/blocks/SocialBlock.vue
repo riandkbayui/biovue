@@ -48,7 +48,7 @@ const availableSocials = [
 ]
 
 const localData = ref({
-  links: props.modelValue?.data?.links || []
+  links: props.modelValue?.links || []
 })
 
 const isSelected = (platform) => {
@@ -71,12 +71,12 @@ const getSocialIcon = (platform) => {
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
-    localData.value = { ...newVal.data }
+  if (newVal) {
+    localData.value = { ...newVal }
   }
 }, { deep: true })
 </script>

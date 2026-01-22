@@ -33,7 +33,7 @@
         <!-- Dynamic Block Component -->
         <component 
           :is="getComponent(item.type)"
-          :model-value="item"
+          :model-value="item.data"
           @update="updateItem(index, $event)"
         />
       </div>
@@ -79,7 +79,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update'])
 
 const localData = ref({
-  items: props.modelValue?.data?.items || []
+  items: props.modelValue?.items || []
 })
 
 const allowedBlocks = [
@@ -126,12 +126,9 @@ const addItem = (type) => {
   emitUpdate()
 }
 
-const updateItem = (index, event) => {
-  // Merge existing item data with new data from event
-  localData.value.items[index] = {
-    ...localData.value.items[index],
-    ...event // event is { data: { ... } }
-  }
+const updateItem = (index, newData) => {
+  // newData is already flat because sub-components are refactored
+  localData.value.items[index].data = newData
   emitUpdate()
 }
 
@@ -151,12 +148,12 @@ const moveItem = (index, direction) => {
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
-    localData.value = { ...newVal.data }
+  if (newVal) {
+    localData.value = { ...newVal }
   }
 }, { deep: true })
 </script>

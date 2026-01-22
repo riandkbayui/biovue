@@ -90,11 +90,11 @@ const colorPresets = [
 ]
 
 const localData = ref({
-  title: props.modelValue?.data?.title || '',
-  url: props.modelValue?.data?.url || '',
-  style: props.modelValue?.data?.style || 'filled',
-  backgroundColor: props.modelValue?.data?.backgroundColor || '#059669', // Default Emerald 600
-  textColor: props.modelValue?.data?.textColor || '#ffffff'
+  title: props.modelValue?.title || '',
+  url: props.modelValue?.url || '',
+  style: props.modelValue?.style || 'filled',
+  backgroundColor: props.modelValue?.backgroundColor || '#059669', // Default Emerald 600
+  textColor: props.modelValue?.textColor || '#ffffff'
 })
 
 const setStyle = (style) => {
@@ -113,17 +113,17 @@ const setTextColor = (hex) => {
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
+  if (newVal) {
     localData.value = { 
-      title: newVal.data.title || '',
-      url: newVal.data.url || '',
-      style: newVal.data.style || 'filled',
-      backgroundColor: newVal.data.backgroundColor || '#059669',
-      textColor: newVal.data.textColor || '#ffffff'
+      title: newVal.title || '',
+      url: newVal.url || '',
+      style: newVal.style || 'filled',
+      backgroundColor: newVal.backgroundColor || '#059669',
+      textColor: newVal.textColor || '#ffffff'
     }
   }
 }, { deep: true })

@@ -7,16 +7,25 @@
         :style="{ borderColor: theme?.accentColor || '#059669' }"
       />
     </div>
-    <div>
-      <h2 class="text-xl font-bold text-gray-900">{{ data?.name || 'Nama Anda' }}</h2>
-      <p class="text-sm text-gray-500">{{ data?.bio || 'Bio singkat Anda...' }}</p>
+    <div :style="{ color: resolvedColor }">
+      <h2 class="text-xl font-bold">{{ data?.name || 'Nama Anda' }}</h2>
+      <p class="text-sm opacity-70">{{ data?.bio || 'Bio singkat Anda...' }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   data: Object,
   theme: Object
+})
+
+const resolvedColor = computed(() => {
+  if (props.data?.textColor === 'accent') {
+    return props.theme?.accentColor || '#059669'
+  }
+  return props.data?.textColor || '#0f172a'
 })
 </script>

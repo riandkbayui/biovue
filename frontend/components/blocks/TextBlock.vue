@@ -131,12 +131,12 @@ const colorPresets = [
 ]
 
 const localData = ref({
-  content: props.modelValue?.data?.content || '',
-  align: props.modelValue?.data?.align || 'left',
-  textColor: props.modelValue?.data?.textColor || '#0f172a',
-  fontSize: props.modelValue?.data?.fontSize || 'md',
-  fontWeight: props.modelValue?.data?.fontWeight || 'normal',
-  isItalic: props.modelValue?.data?.isItalic || false
+  content: props.modelValue?.content || '',
+  align: props.modelValue?.align || 'left',
+  textColor: props.modelValue?.textColor || '#0f172a',
+  fontSize: props.modelValue?.fontSize || 'md',
+  fontWeight: props.modelValue?.fontWeight || 'normal',
+  isItalic: props.modelValue?.isItalic || false
 })
 
 const setAlign = (align) => {
@@ -160,7 +160,7 @@ const toggleItalic = () => {
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 const getFontSizePx = (size) => {
@@ -180,14 +180,14 @@ const getFontSizePx = (size) => {
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
+  if (newVal) {
     localData.value = { 
-      content: newVal.data.content || '',
-      align: newVal.data.align || 'left',
-      textColor: newVal.data.textColor || '#0f172a',
-      fontSize: newVal.data.fontSize || 'md',
-      fontWeight: newVal.data.fontWeight || 'normal',
-      isItalic: newVal.data.isItalic || false
+      content: newVal.content || '',
+      align: newVal.align || 'left',
+      textColor: newVal.textColor || '#0f172a',
+      fontSize: newVal.fontSize || 'md',
+      fontWeight: newVal.fontWeight || 'normal',
+      isItalic: newVal.isItalic || false
     }
   }
 }, { deep: true })

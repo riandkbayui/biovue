@@ -71,19 +71,46 @@
                 Tema & Gaya
               </h3>
               <div class="space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <!-- Background Color Picker -->
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Warna Latar</label>
-                    <div class="flex items-center gap-3">
-                      <input v-model="pageData.theme.backgroundColor" type="color" class="w-12 h-12 rounded-xl cursor-pointer border-2 border-gray-100 p-1 bg-white shadow-sm">
-                      <input v-model="pageData.theme.backgroundColor" type="text" class="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none uppercase font-mono text-sm shadow-sm" placeholder="#F9FAFB">
+                    <label class="block text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
+                      Warna Latar
+                      <span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">{{ pageData.theme.backgroundColor }}</span>
+                    </label>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                      <button 
+                        v-for="color in bgColors" 
+                        :key="color.hex"
+                        @click="pageData.theme.backgroundColor = color.hex"
+                        :class="[
+                          'w-8 h-8 rounded-full border-2 transition-all hover:scale-110 shadow-sm',
+                          pageData.theme.backgroundColor === color.hex ? 'border-emerald-500 ring-2 ring-emerald-500/20 scale-110' : 'border-white'
+                        ]"
+                        :style="{ backgroundColor: color.hex }"
+                        :title="color.name"
+                      ></button>
                     </div>
                   </div>
+
+                  <!-- Accent Color Picker -->
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Warna Aksen</label>
-                    <div class="flex items-center gap-3">
-                      <input v-model="pageData.theme.accentColor" type="color" class="w-12 h-12 rounded-xl cursor-pointer border-2 border-gray-100 p-1 bg-white shadow-sm">
-                      <input v-model="pageData.theme.accentColor" type="text" class="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none uppercase font-mono text-sm shadow-sm" placeholder="#10B981">
+                    <label class="block text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
+                      Warna Aksen
+                      <span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">{{ pageData.theme.accentColor }}</span>
+                    </label>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                      <button 
+                        v-for="color in accentColors" 
+                        :key="color.hex"
+                        @click="pageData.theme.accentColor = color.hex"
+                        :class="[
+                          'w-8 h-8 rounded-full border-2 transition-all hover:scale-110 shadow-sm',
+                          pageData.theme.accentColor === color.hex ? 'border-emerald-500 ring-2 ring-emerald-500/20 scale-110' : 'border-white'
+                        ]"
+                        :style="{ backgroundColor: color.hex }"
+                        :title="color.name"
+                      ></button>
                     </div>
                   </div>
                 </div>
@@ -213,7 +240,7 @@
                     <div class="p-4">
                       <component 
                         :is="getBlockComponent(element.type)" 
-                        :modelValue="{ data: blocks[index].content }"
+                        :modelValue="blocks[index].content"
                         @update="handleUpdateBlock(element.id, $event)"
                       />
                     </div>
@@ -438,11 +465,11 @@ const addBlockAndClose = (type) => {
 }
 
 const handleUpdateBlock = (id, event) => {
-    // Update data lokal saja
     const index = blocks.value.findIndex(b => b.id === id)
     if (index !== -1) {
-        // Sebagian besar komponen emit { data: ... }
-        blocks.value[index].content = event?.data || event
+        // Standarisasi: Selalu ambil properti 'data' jika ada, jika tidak gunakan seluruh event
+        const newData = (event && typeof event === 'object' && event.data) ? event.data : event
+        blocks.value[index].content = newData
     }
 }
 
@@ -467,14 +494,27 @@ const handleDeleteBlock = (id) => {
 // Helpers...
 const bgColors = [
   { name: 'Gray 50', hex: '#f9fafb' },
+  { name: 'White', hex: '#ffffff' },
   { name: 'Slate 900', hex: '#0f172a' },
+  { name: 'Gray 600', hex: '#4b5563' },
+  { name: 'Zinc 400', hex: '#a1a1aa' },
   { name: 'Blue 600', hex: '#2563eb' },
   { name: 'Emerald 600', hex: '#059669' },
   { name: 'Rose 600', hex: '#e11d48' },
-  { name: 'Amber 500', hex: '#f59e0b' },
+  { name: 'Amber 600', hex: '#d97706' },
   { name: 'Indigo 600', hex: '#4f46e5' },
-  { name: 'Violet 600', hex: '#7c3aed' },
-  { name: 'Pink 500', hex: '#ec4899' },
+]
+
+const accentColors = [
+  { name: 'Slate 900', hex: '#0f172a' },
+  { name: 'Gray 600', hex: '#4b5563' },
+  { name: 'Zinc 400', hex: '#a1a1aa' },
+  { name: 'White', hex: '#ffffff' },
+  { name: 'Blue 600', hex: '#2563eb' },
+  { name: 'Emerald 600', hex: '#059669' },
+  { name: 'Rose 600', hex: '#e11d48' },
+  { name: 'Amber 600', hex: '#d97706' },
+  { name: 'Indigo 600', hex: '#4f46e5' },
 ]
 
 const availableBlocks = [

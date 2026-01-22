@@ -15,12 +15,14 @@ export function useBlocks() {
                 // Parse JSON data if string
                 if (typeof block.data === 'string') {
                     try {
-                        block.content = JSON.parse(block.data)
+                        const parsed = JSON.parse(block.data)
+                        // Unwrap if it has an extra 'data' property (Double Nesting Fix)
+                        block.content = (parsed && typeof parsed === 'object' && parsed.data) ? parsed.data : parsed
                     } catch (e) {
                         block.content = block.data
                     }
                 } else {
-                    block.content = block.data
+                    block.content = (block.data && typeof block.data === 'object' && block.data.data) ? block.data.data : block.data
                 }
                 return block
             })

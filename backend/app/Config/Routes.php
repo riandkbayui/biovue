@@ -23,4 +23,4 @@ $routes->get('api/profile', '\App\Controllers\Api\Member\Profile::getIndex', ['f
  * SPA Catch-all Route
  * Melemparkan semua rute non-API ke entry point Vue
  */
-// $routes->get('(:any)', 'Home::index', ['filter' => 'cors']);
+$routes->get('^(?!api|statics|uploads)(.*)', 'Home::index');

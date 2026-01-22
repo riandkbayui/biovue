@@ -47,20 +47,54 @@
       </div>
     </div>
 
-    <!-- Alignment -->
-    <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
-      <span class="text-xs font-medium text-gray-500">Posisi:</span>
-      <button 
-        v-for="align in ['left', 'center', 'right']" 
-        :key="align"
-        @click="setAlign(align)"
-        :class="[
-          'px-2 py-1 rounded-md text-xs font-medium transition-colors',
-          localData.align === align ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        ]"
-      >
-        <i :class="['bi', `bi-text-${align}`]"></i>
-      </button>
+    <!-- Customizations -->
+    <div class="flex flex-wrap items-center gap-4 pt-2 border-t border-gray-100">
+      <!-- Alignment -->
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-gray-500">Posisi:</span>
+        <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+          <button 
+            v-for="align in ['left', 'center', 'right']" 
+            :key="align"
+            @click="setAlign(align)"
+            :class="[
+              'w-8 h-8 rounded-md flex items-center justify-center transition-all',
+              localData.align === align ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:text-gray-700'
+            ]"
+          >
+            <i :class="['bi', `bi-text-${align}`]"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Text Color -->
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-gray-500">Warna:</span>
+        <div class="flex flex-wrap gap-1">
+          <button 
+            @click="setColor('accent')"
+            title="Gunakan Warna Aksen"
+            :class="[
+              'w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center',
+              localData.textColor === 'accent' ? 'ring-2 ring-offset-1 ring-emerald-500 border-transparent scale-110' : 'border-gray-300 hover:scale-110'
+            ]"
+          >
+            <i class="bi bi-star-fill text-[10px] text-amber-500"></i>
+          </button>
+
+          <button 
+            v-for="color in colorPresets" 
+            :key="color.hex"
+            @click="setColor(color.hex)"
+            :title="color.name"
+            :class="[
+              'w-6 h-6 rounded-full border transition-all',
+              localData.textColor === color.hex ? 'ring-2 ring-offset-1 ring-emerald-500 border-transparent scale-110' : 'border-gray-200 hover:scale-110'
+            ]"
+            :style="{ backgroundColor: color.hex }"
+          ></button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -76,15 +110,33 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update'])
 const { uploadImage, isUploading } = useUpload()
 
+const colorPresets = [
+  { name: 'Slate 900', hex: '#0f172a' },
+  { name: 'Gray 600', hex: '#4b5563' },
+  { name: 'Zinc 400', hex: '#a1a1aa' },
+  { name: 'White', hex: '#ffffff' },
+  { name: 'Blue 600', hex: '#2563eb' },
+  { name: 'Emerald 600', hex: '#059669' },
+  { name: 'Rose 600', hex: '#e11d48' },
+  { name: 'Amber 600', hex: '#d97706' },
+  { name: 'Indigo 600', hex: '#4f46e5' },
+]
+
 const localData = ref({
   avatar: props.modelValue?.avatar || '',
   name: props.modelValue?.name || '',
   bio: props.modelValue?.bio || '',
-  align: props.modelValue?.align || 'center'
+  align: props.modelValue?.align || 'center',
+  textColor: props.modelValue?.textColor || '#0f172a'
 })
 
 const setAlign = (align) => {
   localData.value.align = align
+  emitUpdate()
+}
+
+const setColor = (color) => {
+  localData.value.textColor = color
   emitUpdate()
 }
 

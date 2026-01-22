@@ -14,16 +14,18 @@
     </router-link>
   </div>
 
-  <div v-else-if="pageData" class="min-h-screen">
-     <!-- Kita gunakan PagePreview untuk merender konten publik -->
-     <PagePreview :pageData="pageData" />
-     
-     <!-- Footer "Made with Aksibio" -->
-     <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-         <a href="/" target="_blank" class="px-4 py-2 bg-white/80 backdrop-blur-md border border-gray-100 rounded-full shadow-lg flex items-center gap-2 hover:bg-white transition-all group">
-             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Made with</span>
-             <span class="text-sm font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500">Aksibio</span>
-         </a>
+  <div v-else-if="pageData" class="min-h-screen flex justify-center bg-gray-100/50">
+     <div class="w-full max-w-md bg-white min-h-screen shadow-[0_0_50px_rgba(0,0,0,0.1)] relative overflow-x-hidden">
+        <!-- Kita gunakan PagePreview untuk merender konten publik -->
+        <PagePreview :pageData="pageData" :blocks="blocks" />
+        
+        <!-- Footer "Made with Aksibio" -->
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-full flex justify-center pointer-events-none">
+            <a href="/" target="_blank" class="px-4 py-2 bg-white/90 backdrop-blur-md border border-gray-100 rounded-full shadow-lg flex items-center gap-2 hover:bg-white transition-all group pointer-events-auto">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Made with</span>
+                <span class="text-sm font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500">Aksibio</span>
+            </a>
+        </div>
      </div>
   </div>
 </template>
@@ -38,22 +40,40 @@ const route = useRoute()
 const isLoading = ref(true)
 const error = ref(null)
 const pageData = ref(null)
+const blocks = ref([])
 
 const fetchPublicPage = async () => {
     isLoading.value = true
     error.value = null
     try {
         const response = await api.get(`/public-page/show/${route.params.slug}`)
-        const { page, blocks } = response.data
+        const { page, blocks: rawBlocks } = response.data
         
-        // Format data agar sesuai dengan prop yang diharapkan PagePreview
+        // Page Info
         pageData.value = {
             ...page,
-            theme: typeof page.theme === 'string' ? JSON.parse(page.theme) : page.theme,
-            blocks: blocks.map(block => ({
-                ...block,
-                content: typeof block.data === 'string' ? JSON.parse(block.data) : block.data
-            }))
+            theme: typeof page.theme === 'string' ? JSON.parse(page.theme) : page.theme
+        }
+
+        // Standardize Blocks (Flat data, no double nesting)
+        blocks.value = rawBlocks.map(block => {
+            let content = {}
+            if (typeof block.data === 'string') {
+                try {
+                    const parsed = JSON.parse(block.data)
+                    content = (parsed && typeof parsed === 'object' && parsed.data) ? parsed.data : parsed
+                } catch (e) {
+                    content = {}
+                }
+            } else {
+                content = (block.data && typeof block.data === 'object' && block.data.data) ? block.data.data : block.data
+            }
+            return { ...block, content }
+        })
+
+        // Update Document Title for SEO
+        if (page.title) {
+            document.title = `${page.title} | Aksibio`
         }
     } catch (err) {
         error.value = err.response?.data?.message || 'Terjadi kesalahan saat memuat halaman.'
