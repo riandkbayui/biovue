@@ -49,7 +49,13 @@
                   <label class="block text-sm font-medium text-gray-700 mb-2">URL Slug</label>
                   <div class="flex items-center gap-2">
                     <span class="text-sm text-gray-500 hidden sm:inline">aksibio.com/</span>
-                    <input v-model="pageData.slug" type="text" disabled class="flex-1 px-4 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-xl cursor-not-allowed">
+                    <input 
+                      v-model="pageData.slug" 
+                      @input="handleSlugInput"
+                      type="text" 
+                      placeholder="slug-halaman"
+                      class="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all font-mono text-sm"
+                    >
                   </div>
                 </div>
                 <div>
@@ -60,6 +66,21 @@
                     placeholder="Deskripsi singkat untuk SEO dan preview link"
                     class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all resize-none"
                   ></textarea>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Status Halaman</label>
+                  <div class="flex items-center gap-4 bg-gray-50 p-1.5 rounded-xl w-fit border border-gray-100">
+                    <button 
+                      v-for="status in [{val: 'active', label: 'Aktif', icon: 'bi-check-circle-fill', color: 'text-emerald-600'}, {val: 'inactive', label: 'Tidak Aktif', icon: 'bi-x-circle-fill', color: 'text-gray-400'}]"
+                      :key="status.val"
+                      @click="pageData.status = status.val"
+                      class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all"
+                      :class="pageData.status === status.val ? 'bg-white shadow-sm ring-1 ring-black/5 ' + status.color : 'text-gray-400 hover:text-gray-600'"
+                    >
+                      <i :class="['bi', status.icon]"></i>
+                      {{ status.label }}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -74,7 +95,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <!-- Background Color Picker -->
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
                       Warna Latar
                       <span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">{{ pageData.theme.backgroundColor }}</span>
                     </label>
@@ -95,7 +116,7 @@
 
                   <!-- Accent Color Picker -->
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
                       Warna Aksen
                       <span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">{{ pageData.theme.accentColor }}</span>
                     </label>
@@ -429,11 +450,22 @@ const handleReorder = () => {
     // Draggable sudah mengupdate array blocks secara otomatis
 }
 
+const handleSlugInput = (e) => {
+  const val = e.target.value
+  pageData.value.slug = val
+    .toLowerCase()
+    .replace(/\s+/g, '-')           // Ganti spasi dengan -
+    .replace(/[^a-z0-9-]/g, '')     // Hanya izinkan a-z, 0-9, dan - (Whitelist)
+    .replace(/--+/g, '-')           // Ganti double -- dengan single -
+}
+
 const savePage = async () => {
   isSaving.value = true
   try {
     const payload = {
         title: pageData.value.title,
+        slug: pageData.value.slug,
+        status: pageData.value.status,
         description: pageData.value.description,
         seo_image: pageData.value.seo_image,
         theme: JSON.stringify(pageData.value.theme),

@@ -20,15 +20,18 @@ class PagesService
     }
 
     /**
-     * Ambil semua halaman milik user tertentu
+     * Ambil halaman dengan pagination
      */
-    public function getAll()
+    public function getPaginated(int $perPage = 10)
     {
-        return $this->pagesModel
-            ->where('user_id', Auth::id())
-            ->where('deleted_at', null)
-            ->orderBy('created_at', 'DESC')
-            ->findAll();
+        return [
+            'data' => $this->pagesModel
+                ->where('user_id', Auth::id())
+                ->where('deleted_at', null)
+                ->orderBy('created_at', 'DESC')
+                ->paginate($perPage),
+            'pager' => $this->pagesModel->pager->getDetails()
+        ];
     }
 
     /**
@@ -96,6 +99,18 @@ class PagesService
         $page->title       = $data['title'];
         $page->description = $data['description'] ?? $page->description;
         $page->updated_by  = Auth::id();
+
+        // Handle Slug Update & Uniqueness
+        if (isset($data['slug']) && $data['slug'] !== $page->slug) {
+            $existing = $this->pagesModel->where('slug', $data['slug'])->where('id !=', $pageId)->first();
+            if ($existing) {
+                return [
+                    'success' => false,
+                    'message' => 'Slug "' . $data['slug'] . '" sudah digunakan oleh halaman lain.'
+                ];
+            }
+            $page->slug = $data['slug'];
+        }
         
         if (!$this->pagesModel->save($page)) {
              return [
@@ -149,10 +164,24 @@ class PagesService
         }
 
         $page->title       = $data['title'] ?? $page->title;
+        $page->status      = $data['status'] ?? $page->status;
         $page->description = $data['description'] ?? $page->description;
         $page->seo_image   = $data['seo_image'] ?? $page->seo_image;
         $page->theme       = $data['theme'] ?? $page->theme;
         $page->updated_by  = Auth::id();
+
+        // Handle Slug Update & Uniqueness
+        if (isset($data['slug']) && $data['slug'] !== $page->slug) {
+            $existing = $this->pagesModel->where('slug', $data['slug'])->where('id !=', $pageId)->first();
+            if ($existing) {
+                $db->transRollback();
+                return [
+                    'success' => false,
+                    'message' => 'Slug "' . $data['slug'] . '" sudah digunakan oleh halaman lain.'
+                ];
+            }
+            $page->slug = $data['slug'];
+        }
         
         if ($page->hasChanged()) {
             $this->pagesModel->save($page);

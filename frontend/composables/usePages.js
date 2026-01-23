@@ -3,17 +3,29 @@ import api from '@/utils/axios'
 
 export function usePages() {
     const pages = ref([])
+    const pagination = ref({
+        currentPage: 1,
+        pageCount: 1,
+        total: 0,
+        perPage: 9
+    })
     const page = ref(null)
     const isLoading = ref(false)
     const error = ref(null)
 
-    // Ambil semua halaman
-    const fetchPages = async () => {
+    // Ambil semua halaman (dengan pagination)
+    const fetchPages = async (pageNum = 1) => {
         isLoading.value = true
         error.value = null
         try {
-            const response = await api.get('/member/pages')
+            const response = await api.get(`/member/pages?page=${pageNum}&perPage=${pagination.value.perPage}`)
             pages.value = response.data.data
+            pagination.value = {
+                currentPage: response.data.pager.currentPage,
+                pageCount: response.data.pager.pageCount,
+                total: response.data.pager.total,
+                perPage: response.data.pager.perPage
+            }
         } catch (err) {
             error.value = err.response?.data?.message || 'Gagal mengambil data halaman.'
             console.error(err)
@@ -110,6 +122,7 @@ export function usePages() {
 
     return {
         pages,
+        pagination,
         page,
         isLoading,
         error,

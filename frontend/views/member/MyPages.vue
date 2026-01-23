@@ -34,58 +34,116 @@
     </div>
 
     <!-- Grid List -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="page in pages" :key="page.id" class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden group hover:shadow-xl transition-all duration-300">
-        <div class="h-32 bg-gradient-to-r from-emerald-500 to-teal-500 relative">
-             <div class="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
-                 <i class="bi bi-grid-3x3-gap text-7xl"></i>
-             </div>
-             <div class="absolute -bottom-6 left-6">
-                 <div class="w-16 h-16 rounded-2xl bg-white p-1 shadow-lg overflow-hidden border border-gray-100 group-hover:scale-110 transition-transform">
-                     <div class="w-full h-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-2xl rounded-xl">
-                        {{ page.title.substring(0, 1).toUpperCase() }}
-                     </div>
-                 </div>
-             </div>
-             <div class="absolute top-4 right-4 relative">
-                 <div class="dropdown dropdown-end">
-                    <button tabindex="0" class="w-8 h-8 rounded-lg bg-black/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/40 transition-colors">
-                        <i class="bi bi-three-dots"></i>
-                    </button>
-                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2 text-gray-700">
-                        <li><a @click="handleDelete(page.id)" class="text-red-600"><i class="bi bi-trash"></i> Hapus</a></li>
-                    </ul>
-                 </div>
-             </div>
-        </div>
-        <div class="p-6 pt-10">
-          <div class="flex items-center justify-between">
-              <h4 class="font-bold text-lg text-gray-900 leading-none truncate pr-2">{{ page.title }}</h4>
-              <span :class="['px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider', page.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500']">
-                {{ page.status }}
-              </span>
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
+      <div v-for="page in pages" :key="page.id" class="bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500 group relative">
+        
+        <!-- Action: Delete (Top Right - Always Visible for Mobile First) -->
+        <button 
+          @click="handleDelete(page.id)"
+          class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-red-500 hover:text-white transition-all z-10 shadow-lg border border-white/10"
+          title="Hapus Halaman"
+        >
+          <i class="bi bi-trash text-xs"></i>
+        </button>
+
+        <!-- Header: Background & Initial -->
+        <div class="h-28 bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-400 relative overflow-hidden p-6">
+          <div class="absolute inset-0 opacity-20 transform -rotate-12 translate-y-4">
+            <i class="bi bi-link-45deg text-[10rem] -ml-8"></i>
           </div>
-          <p class="text-sm text-gray-500 mt-2 flex items-center gap-1 truncate">
-              <i class="bi bi-link-45deg"></i>
-              <a :href="'/' + page.slug" target="_blank" class="hover:underline">aksibio.com/{{ page.slug }}</a>
-          </p>
           
-          <div class="flex items-center gap-4 mt-6 pt-6 border-t border-gray-50">
-              <div class="flex-1">
-                  <p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Created</p>
-                  <p class="font-bold text-gray-900 font-mono text-xs">{{ formatDate(page.created_at.date) }}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                  <router-link :to="'/member/page-builder/' + page.id" class="w-10 h-10 rounded-xl bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all" title="Edit Halaman (Page Builder)">
-                      <i class="bi bi-pencil-square"></i>
-                  </router-link>
-                  <a :href="'/' + page.slug" target="_blank" class="w-10 h-10 rounded-xl bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 transition-all" title="Lihat Halaman">
-                      <i class="bi bi-box-arrow-up-right"></i>
-                  </a>
-              </div>
+          <div class="relative flex justify-between items-start">
+            <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white font-black text-2xl shadow-xl">
+              {{ (page.title || 'A').charAt(0).toUpperCase() }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 pt-6">
+          <div class="mb-5">
+            <div class="flex items-center justify-between gap-3">
+                <h4 class="font-black text-lg text-gray-900 leading-tight truncate">{{ page.title }}</h4>
+                <span :class="['px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0', 
+                page.status === 'active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-gray-50 text-gray-500 border-gray-100']">
+                {{ page.status }}
+                </span>
+            </div>
+            <div class="flex items-center gap-2 mt-1.5 group/link">
+              <span class="text-xs font-bold text-gray-400 flex items-center gap-1">
+                <i class="bi bi-globe2"></i> aksibio.com/{{ page.slug }}
+              </span>
+              <button @click="copyLink(page.slug)" class="w-6 h-6 rounded-md bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all flex items-center justify-center opacity-0 group-hover/link:opacity-100" title="Salin Link">
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Actions -->
+          <div class="flex items-center gap-3 pt-6 border-t border-gray-50">
+            <router-link 
+              :to="'/member/page-builder/' + page.id" 
+              class="flex-1 h-12 rounded-xl bg-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-700 hover:scale-[1.02] transition-all shadow-lg shadow-emerald-600/20"
+            >
+              <i class="bi bi-pencil-square"></i>
+              Edit Builder
+            </router-link>
+            
+            <a 
+              :href="'/' + page.slug" 
+              target="_blank" 
+              class="w-12 h-12 rounded-xl bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all border border-transparent hover:border-emerald-100"
+              title="Lihat Live"
+            >
+              <i class="bi bi-box-arrow-up-right text-lg"></i>
+            </a>
+          </div>
+
+          <div class="mt-4 flex items-center justify-between text-[10px] text-gray-300 font-bold uppercase tracking-widest">
+            <span>Dibuat pada</span>
+            <span>{{ formatDate(page.created_at?.date) }}</span>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div v-if="pagination.pageCount > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-100">
+        <p class="text-sm text-gray-500 font-medium">
+            Menampilkan <span class="text-gray-900 font-bold">{{ pages.length }}</span> dari <span class="text-gray-900 font-bold">{{ pagination.total }}</span> halaman
+        </p>
+        
+        <div class="flex items-center gap-1 bg-white p-1 rounded-2xl border border-gray-100 shadow-sm">
+            <button 
+                @click="changePage(pagination.currentPage - 1)"
+                :disabled="pagination.currentPage === 1"
+                class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all font-bold"
+            >
+                <i class="bi bi-chevron-left"></i>
+            </button>
+
+            <button 
+                v-for="p in pagination.pageCount" 
+                :key="p"
+                @click="changePage(p)"
+                :class="[
+                    'w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all',
+                    pagination.currentPage === p 
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 scale-110' 
+                    : 'text-gray-500 hover:bg-emerald-50 hover:text-emerald-600'
+                ]"
+            >
+                {{ p }}
+            </button>
+
+            <button 
+                @click="changePage(pagination.currentPage + 1)"
+                :disabled="pagination.currentPage === pagination.pageCount"
+                class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all font-bold"
+            >
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
     </div>
   </div>
 </template>
@@ -94,16 +152,29 @@
 import { onMounted } from 'vue'
 import { usePages } from '@/composables/usePages'
 
-const { pages, fetchPages, deletePage, isLoading, error } = usePages()
+const { pages, pagination, fetchPages, deletePage, isLoading, error } = usePages()
 
 onMounted(() => {
     fetchPages()
 })
 
+const changePage = (page) => {
+    if (page < 1 || page > pagination.value.pageCount) return
+    fetchPages(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 const handleDelete = async (id) => {
     if (confirm('Apakah Anda yakin ingin menghapus halaman ini?')) {
         await deletePage(id)
     }
+}
+
+const copyLink = (slug) => {
+    const url = `${window.location.origin}/${slug}`
+    navigator.clipboard.writeText(url).then(() => {
+        alert('Link berhasil disalin ke clipboard!')
+    })
 }
 
 const formatDate = (dateString) => {

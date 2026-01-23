@@ -19,8 +19,9 @@ class Pages extends ResourceController
     public function getIndex()
     {
         try {
-            $data = $this->pagesService->getAll();
-            return $this->respond(['data' => $data]);
+            $perPage = $this->request->getVar('perPage') ?? 9;
+            $result = $this->pagesService->getPaginated((int)$perPage);
+            return $this->respond($result);
         } catch (Exception $e) {
             return $this->failServerError($e->getMessage());
         }
