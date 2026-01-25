@@ -1,8 +1,11 @@
 <template>
   <div :class="['p-4 rounded-xl flex items-start gap-3', getTypeClasses(data?.type)]">
     <i :class="['bi text-lg mt-0.5', getTypeIcon(data?.type)]"></i>
-    <div class="text-sm font-medium whitespace-pre-wrap">
-      {{ data?.content || 'Alert content' }}
+    <div class="flex-1">
+      <div v-if="data?.title" class="font-bold text-sm mb-0.5">{{ data.title }}</div>
+      <div class="text-xs opacity-90 leading-relaxed">
+        {{ data?.content || data?.message || 'Pesan pengumuman penting!' }}
+      </div>
     </div>
   </div>
 </template>

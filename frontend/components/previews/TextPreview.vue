@@ -1,7 +1,7 @@
 <template>
-  <div 
-    :style="{ 
-      color: resolvedColor, 
+  <div
+    :style="{
+      color: resolvedColor,
       textAlign: data?.align || 'left',
       fontSize: getFontSizePx(data?.fontSize),
       fontWeight: data?.fontWeight || 'normal',
@@ -9,7 +9,7 @@
     }"
     class="px-2 py-1 whitespace-pre-wrap leading-relaxed"
   >
-    {{ data?.content || 'Text content' }}
+    {{ data?.content || data?.text || 'Tulis teks di sini...' }}
   </div>
 </template>
 
