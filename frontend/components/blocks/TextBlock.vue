@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-3">
-    <textarea 
+    <textarea
       v-model="localData.content"
       @input="emitUpdate"
       rows="3"
       placeholder="Tulis teks di sini..."
-      :style="{ 
-        color: localData.textColor === 'accent' ? '#059669' : localData.textColor, 
+      :style="{
+        color: localData.textColor === 'accent' ? '#059669' : localData.textColor,
         textAlign: localData.align,
         fontSize: getFontSizePx(localData.fontSize),
         fontWeight: localData.fontWeight,
@@ -17,8 +17,8 @@
     <div class="flex flex-wrap items-center gap-4">
       <!-- Size & Style -->
       <div class="flex items-center gap-2">
-        <select 
-          v-model="localData.fontSize" 
+        <select
+          v-model="localData.fontSize"
           @change="emitUpdate"
           class="text-xs border border-gray-300 rounded-lg px-2 py-1.5 bg-white outline-none focus:ring-1 focus:ring-emerald-500"
         >
@@ -39,7 +39,7 @@
         </select>
 
         <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
-          <button 
+          <button
             @click="toggleBold"
             :class="[
               'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
@@ -49,7 +49,7 @@
           >
             <i class="bi bi-type-bold"></i>
           </button>
-          <button 
+          <button
             @click="toggleItalic"
             :class="[
               'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
@@ -64,8 +64,8 @@
 
       <!-- Alignment -->
       <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
-        <button 
-          v-for="align in ['left', 'center', 'right']" 
+        <button
+          v-for="align in ['left', 'center', 'right']"
           :key="align"
           @click="setAlign(align)"
           :class="[
@@ -81,7 +81,7 @@
       <div class="flex items-center gap-2">
         <div class="flex flex-wrap gap-1">
           <!-- Accent Color Choice -->
-          <button 
+          <button
             @click="setColor('accent')"
             title="Gunakan Warna Aksen Halaman"
             :class="[
@@ -92,8 +92,8 @@
             <i class="bi bi-star-fill text-[10px] text-amber-500"></i>
           </button>
 
-          <button 
-            v-for="color in colorPresets" 
+          <button
+            v-for="color in colorPresets"
             :key="color.hex"
             @click="setColor(color.hex)"
             :title="color.name"
@@ -131,7 +131,7 @@ const colorPresets = [
 ]
 
 const localData = ref({
-  content: props.modelValue?.content || '',
+  content: props.modelValue?.content || props.modelValue?.text || '',
   align: props.modelValue?.align || 'left',
   textColor: props.modelValue?.textColor || '#0f172a',
   fontSize: props.modelValue?.fontSize || 'md',
@@ -181,8 +181,8 @@ const getFontSizePx = (size) => {
 
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    localData.value = { 
-      content: newVal.content || '',
+    localData.value = {
+      content: newVal.content || newVal.text || '',
       align: newVal.align || 'left',
       textColor: newVal.textColor || '#0f172a',
       fontSize: newVal.fontSize || 'md',

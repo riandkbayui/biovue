@@ -4,10 +4,10 @@
     <div v-if="localData.images.length > 0" class="space-y-3">
       <div v-for="(image, index) in localData.images" :key="index" class="relative group bg-gray-50 rounded-xl p-2 border border-gray-200 flex items-center gap-3">
         <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white border border-gray-200">
-          <img :src="image.url" class="w-full h-full object-cover" />
+          <Image :src="image.url" class="w-full h-full object-cover" />
         </div>
         <div class="flex-1 min-w-0">
-          <input 
+          <input
             v-model="image.caption"
             @change="emitUpdate"
             type="text"
@@ -15,21 +15,21 @@
             class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all mb-2"
           />
           <div class="flex items-center gap-2">
-            <button 
-              @click="moveImage(index, -1)" 
+            <button
+              @click="moveImage(index, -1)"
               :disabled="index === 0"
               class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 transition-colors"
             >
               <i class="bi bi-arrow-up-circle-fill text-lg"></i>
             </button>
-            <button 
-              @click="moveImage(index, 1)" 
+            <button
+              @click="moveImage(index, 1)"
               :disabled="index === localData.images.length - 1"
               class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 transition-colors"
             >
               <i class="bi bi-arrow-down-circle-fill text-lg"></i>
             </button>
-            <button 
+            <button
               @click="removeImage(index)"
               class="p-1 text-red-400 hover:text-red-600 ml-auto transition-colors"
             >
@@ -42,7 +42,7 @@
 
     <!-- Empty State / Add Button -->
     <div class="relative">
-      <input 
+      <input
         type="file"
         multiple
         accept="image/*"
@@ -64,6 +64,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import Image from '@/components/Image.vue'
 import { useUpload } from '@/composables/useUpload'
 
 const props = defineProps({
@@ -76,7 +77,7 @@ const { uploadImage, isUploading } = useUpload()
 const imageInput = ref(null)
 
 const localData = ref({
-  images: props.modelValue?.images || []
+  images: props.modelValue?.images || props.modelValue?.data?.images || []
 })
 
 const handleImageUpload = async (event) => {
@@ -133,7 +134,8 @@ const emitUpdate = () => {
 
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    localData.value = { ...newVal }
+    const images = newVal.images || newVal.data?.images || []
+    localData.value.images = [...images]
   }
 }, { deep: true })
 </script>

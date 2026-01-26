@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-3">
     <div class="flex flex-wrap gap-2">
-      <button 
-        v-for="social in availableSocials" 
+      <button
+        v-for="social in availableSocials"
         :key="social.name"
         @click="toggleSocial(social.name)"
         :class="[
@@ -17,7 +17,7 @@
     <div v-if="localData.links.length > 0" class="space-y-2">
       <div v-for="(link, index) in localData.links" :key="index" class="flex items-center gap-2">
         <i :class="['bi', getSocialIcon(link.platform), 'text-gray-500']"></i>
-        <input 
+        <input
           v-model="link.url"
           @input="emitUpdate"
           type="url"
@@ -48,25 +48,27 @@ const availableSocials = [
 ]
 
 const localData = ref({
-  links: props.modelValue?.links || []
+  links: Array.isArray(props.modelValue)
+    ? props.modelValue
+    : (props.modelValue?.links || [])
 })
 
 const isSelected = (platform) => {
-  return localData.value.links.some(link => link.platform === platform)
+  return localData.value.links.some(link => link.platform.toLowerCase() === platform.toLowerCase())
 }
 
 const toggleSocial = (platform) => {
-  const index = localData.value.links.findIndex(link => link.platform === platform)
+  const index = localData.value.links.findIndex(link => link.platform.toLowerCase() === platform.toLowerCase())
   if (index > -1) {
     localData.value.links.splice(index, 1)
   } else {
-    localData.value.links.push({ platform, url: '' })
+    localData.value.links.push({ platform: platform.toLowerCase(), url: '' })
   }
   emitUpdate()
 }
 
 const getSocialIcon = (platform) => {
-  const social = availableSocials.find(s => s.name === platform)
+  const social = availableSocials.find(s => s.name.toLowerCase() === platform.toLowerCase())
   return social?.icon || 'bi-link'
 }
 
@@ -76,7 +78,9 @@ const emitUpdate = () => {
 
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    localData.value = { ...newVal }
+    localData.value.links = Array.isArray(newVal)
+      ? newVal
+      : (newVal.links || [])
   }
 }, { deep: true })
 </script>

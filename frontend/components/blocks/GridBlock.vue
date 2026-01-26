@@ -7,21 +7,21 @@
         <div class="flex items-center justify-between mb-2 pb-2 border-b border-gray-200">
           <span class="text-[10px] font-bold uppercase text-gray-500">{{ item.type }}</span>
           <div class="flex items-center gap-1">
-             <button 
-              @click="moveItem(index, -1)" 
+             <button
+              @click="moveItem(index, -1)"
               :disabled="index === 0"
               class="text-gray-400 hover:text-gray-600 disabled:opacity-30"
             >
               <i class="bi bi-arrow-left-circle-fill"></i>
             </button>
-            <button 
-              @click="moveItem(index, 1)" 
+            <button
+              @click="moveItem(index, 1)"
               :disabled="index === localData.items.length - 1"
               class="text-gray-400 hover:text-gray-600 disabled:opacity-30"
             >
               <i class="bi bi-arrow-right-circle-fill"></i>
             </button>
-            <button 
+            <button
               @click="removeItem(index)"
               class="text-red-400 hover:text-red-600 ml-1"
             >
@@ -31,7 +31,7 @@
         </div>
 
         <!-- Dynamic Block Component -->
-        <component 
+        <component
           :is="getComponent(item.type)"
           :model-value="item.data"
           @update="updateItem(index, $event)"
@@ -43,8 +43,8 @@
     <div class="bg-gray-50 rounded-xl p-4 border-2 border-dashed border-gray-300">
       <p class="text-sm text-gray-500 font-medium text-center mb-3">Tambah ke Grid</p>
       <div class="grid grid-cols-4 gap-2">
-        <button 
-          v-for="block in allowedBlocks" 
+        <button
+          v-for="block in allowedBlocks"
           :key="block.type"
           @click="addItem(block.type)"
           class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all"
@@ -78,8 +78,26 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'update'])
 
+const normalizeItems = (items) => {
+  if (!items || !Array.isArray(items)) return []
+  return items.map(item => {
+    // Jika format sudah benar (punya type)
+    if (item.type) return item
+
+    // Jika format lama (seeder), konversi ke dynamic block 'image'
+    return {
+      type: 'image',
+      data: {
+        url: item.image || '',
+        alt: item.title || '',
+        size: 'medium'
+      }
+    }
+  })
+}
+
 const localData = ref({
-  items: props.modelValue?.items || []
+  items: normalizeItems(props.modelValue?.items || [])
 })
 
 const allowedBlocks = [
@@ -112,7 +130,7 @@ const getDefaultData = (type) => {
     image: { url: '', alt: '', size: 'small' },
     video: { url: '', platform: 'youtube' },
     social: { links: [] },
-    alert: { content: 'Info', type: 'info' },
+    alert: { title: '', content: 'Info', type: 'info' },
     countdown: { title: '', targetDate: '', style: 'simple' },
   }
   return defaults[type] || {}
@@ -127,7 +145,6 @@ const addItem = (type) => {
 }
 
 const updateItem = (index, newData) => {
-  // newData is already flat because sub-components are refactored
   localData.value.items[index].data = newData
   emitUpdate()
 }
@@ -140,9 +157,11 @@ const removeItem = (index) => {
 const moveItem = (index, direction) => {
   const newIndex = index + direction
   if (newIndex >= 0 && newIndex < localData.value.items.length) {
-    const temp = localData.value.items[index]
-    localData.value.items[index] = localData.value.items[newIndex]
-    localData.value.items[newIndex] = temp
+    const items = [...localData.value.items]
+    const temp = items[index]
+    items[index] = items[newIndex]
+    items[newIndex] = temp
+    localData.value.items = items
     emitUpdate()
   }
 }
@@ -153,7 +172,7 @@ const emitUpdate = () => {
 
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    localData.value = { ...newVal }
+    localData.value.items = normalizeItems(newVal.items || [])
   }
 }, { deep: true })
 </script>

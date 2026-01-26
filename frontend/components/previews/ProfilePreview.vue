@@ -1,9 +1,9 @@
 <template>
   <div :class="['space-y-2', `text-${data?.align || 'center'}`]">
     <div v-if="data?.avatar" class="flex justify-center">
-      <img 
-        :src="data.avatar" 
-        class="w-24 h-24 rounded-full border-2 shadow-lg object-cover" 
+      <Image
+        :src="data.avatar"
+        class="w-24 h-24 rounded-full border-2 shadow-lg object-cover"
         :style="{ borderColor: theme?.accentColor || '#059669' }"
       />
     </div>
@@ -15,6 +15,7 @@
 </template>
 
 <script setup>
+import Image from '@/components/Image.vue'
 import { computed } from 'vue'
 
 const props = defineProps({

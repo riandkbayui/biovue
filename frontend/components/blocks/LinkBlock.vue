@@ -1,23 +1,42 @@
 <template>
   <div class="space-y-3">
-    <input 
+    <input
       v-model="localData.title"
       @input="emitUpdate"
       type="text"
       placeholder="Judul link"
       class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
     />
-    <input 
-      v-model="localData.url"
-      @input="emitUpdate"
-      type="url"
-      placeholder="https://example.com"
-      class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-    />
+    <div class="space-y-1">
+        <input
+            v-model="localData.url"
+            @input="emitUpdate"
+            type="url"
+            placeholder="https://example.com"
+            class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+        />
+    </div>
+    <div class="space-y-1">
+        <div class="flex items-center justify-between px-1">
+            <label class="text-[10px] font-bold text-gray-400 uppercase">Ikon (Opsional)</label>
+            <a href="https://icons.getbootstrap.com/" target="_blank" class="text-[10px] text-emerald-600 hover:underline">Cari Ikon <i class="bi bi-box-arrow-up-right"></i></a>
+        </div>
+        <div class="relative">
+            <input
+                v-model="localData.icon"
+                @input="emitUpdate"
+                type="text"
+                placeholder="bi-whatsapp, bi-linkedin, dll"
+                class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+            />
+            <i v-if="localData.icon" :class="['bi', localData.icon, 'absolute left-3 top-1/2 -translate-y-1/2 text-gray-400']"></i>
+            <i v-else class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"></i>
+        </div>
+    </div>
     <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
       <span class="text-sm font-medium text-gray-700">Style:</span>
-      <button 
-        v-for="s in ['filled', 'outline', 'minimal']" 
+      <button
+        v-for="s in ['filled', 'outline', 'minimal']"
         :key="s"
         @click="setStyle(s)"
         :class="[
@@ -34,8 +53,8 @@
       <div class="flex flex-col gap-2">
         <span class="text-xs font-bold text-gray-400 uppercase">Warna Background</span>
         <div class="flex flex-wrap gap-1.5">
-          <button 
-            v-for="color in colorPresets" 
+          <button
+            v-for="color in colorPresets"
             :key="color.hex"
             @click="setBgColor(color.hex)"
             :title="color.name"
@@ -52,8 +71,8 @@
       <div class="flex flex-col gap-2">
         <span class="text-xs font-bold text-gray-400 uppercase">Warna Teks</span>
         <div class="flex flex-wrap gap-1.5">
-          <button 
-            v-for="color in colorPresets" 
+          <button
+            v-for="color in colorPresets"
             :key="color.hex"
             @click="setTextColor(color.hex)"
             :title="color.name"
@@ -92,6 +111,7 @@ const colorPresets = [
 const localData = ref({
   title: props.modelValue?.title || '',
   url: props.modelValue?.url || '',
+  icon: props.modelValue?.icon || '',
   style: props.modelValue?.style || 'filled',
   backgroundColor: props.modelValue?.backgroundColor || '#059669', // Default Emerald 600
   textColor: props.modelValue?.textColor || '#ffffff'
@@ -118,9 +138,10 @@ const emitUpdate = () => {
 
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    localData.value = { 
+    localData.value = {
       title: newVal.title || '',
       url: newVal.url || '',
+      icon: newVal.icon || '',
       style: newVal.style || 'filled',
       backgroundColor: newVal.backgroundColor || '#059669',
       textColor: newVal.textColor || '#ffffff'

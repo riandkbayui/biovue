@@ -1,10 +1,12 @@
 <template>
   <div v-if="data?.url" :class="['rounded-xl overflow-hidden', getSizeClass(data?.size)]">
-    <img :src="data.url" :alt="data.alt || ''" class="w-full h-auto" />
+    <Image :src="data.url" :alt="data.alt || ''" class="w-full h-auto" />
   </div>
 </template>
 
 <script setup>
+import Image from '@/components/Image.vue'
+
 defineProps({
   data: Object
 })

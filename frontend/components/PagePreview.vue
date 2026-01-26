@@ -1,15 +1,15 @@
 <template>
-  <div 
+  <div
     class="min-h-full pl-6 pr-8 py-6 pb-20 space-y-6 transition-all duration-500"
     :style="bgStyle"
   >
     <!-- Default Header (Hanya muncul jika tidak ada Profile Block) -->
     <div v-if="!hasProfileBlock" class="text-center mb-8 animate-fade-in">
-      <div 
+      <div
         class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-emerald-500/20 ring-4 ring-white"
-        :style="{ 
+        :style="{
           backgroundColor: pageData?.theme?.accentColor || '#059669',
-          boxShadow: `0 10px 15px -3px ${pageData?.theme?.accentColor}33` 
+          boxShadow: `0 10px 15px -3px ${pageData?.theme?.accentColor}33`
         }"
       >
         {{ (pageData?.title || 'A').charAt(0) }}
@@ -21,9 +21,9 @@
     <!-- Blocks List -->
     <div class="space-y-4">
       <div v-for="block in safeBlocks" :key="block.id" class="animate-slide-up">
-        <component 
-          :is="getPreviewComponent(block.type)" 
-          :data="block.content" 
+        <component
+          :is="getPreviewComponent(block.type)"
+          :data="block.content"
           :theme="pageData?.theme"
         />
       </div>
@@ -33,6 +33,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { getFullUrl } from '@/utils/helpers.js'
 import TextPreview from '@/components/previews/TextPreview.vue'
 import LinkPreview from '@/components/previews/LinkPreview.vue'
 import ImagePreview from '@/components/previews/ImagePreview.vue'
@@ -63,7 +64,7 @@ const bgStyle = computed(() => {
   const theme = props.pageData?.theme || {}
   if (theme.backgroundType === 'image' && theme.backgroundImage) {
     return {
-      backgroundImage: `url(${theme.backgroundImage})`,
+      backgroundImage: `url(${getFullUrl(theme.backgroundImage)})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'

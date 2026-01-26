@@ -3,14 +3,14 @@
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Pesan</label>
       <div class="flex flex-wrap gap-2">
-        <button 
-          v-for="type in types" 
+        <button
+          v-for="type in types"
           :key="type.value"
           @click="setType(type.value)"
           :class="[
             'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2',
-            localData.type === type.value 
-              ? 'ring-2 ring-offset-1' 
+            localData.type === type.value
+              ? 'ring-2 ring-offset-1'
               : 'hover:bg-gray-100',
             getTypeClasses(type.value)
           ]"
@@ -22,7 +22,14 @@
     </div>
 
     <div>
-      <textarea 
+      <input
+        v-model="localData.title"
+        @input="emitUpdate"
+        type="text"
+        placeholder="Judul Pengumuman (Opsional)"
+        class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all mb-3 text-sm font-bold"
+      />
+      <textarea
         v-model="localData.content"
         @input="emitUpdate"
         rows="3"
@@ -34,8 +41,11 @@
     <!-- Preview -->
     <div :class="['p-4 rounded-xl flex items-start gap-3', getTypeClasses(localData.type)]">
       <i :class="['bi text-lg mt-0.5', getTypeIcon(localData.type)]"></i>
-      <div class="text-sm font-medium">
-        {{ localData.content || 'Preview pesan akan muncul di sini...' }}
+      <div class="flex-1">
+        <div v-if="localData.title" class="font-bold text-sm mb-0.5">{{ localData.title }}</div>
+        <div class="text-xs opacity-90 leading-relaxed">
+          {{ localData.content || 'Preview pesan akan muncul di sini...' }}
+        </div>
       </div>
     </div>
   </div>
@@ -58,8 +68,9 @@ const types = [
 ]
 
 const localData = ref({
-  content: props.modelValue?.data?.content || '',
-  type: props.modelValue?.data?.type || 'info'
+  title: props.modelValue?.title || '',
+  content: props.modelValue?.content || props.modelValue?.message || '',
+  type: props.modelValue?.type || 'info'
 })
 
 const setType = (type) => {
@@ -83,12 +94,17 @@ const getTypeIcon = (type) => {
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
-    localData.value = { ...newVal.data }
+  if (newVal) {
+    const data = newVal.data || newVal
+    localData.value = {
+      title: data.title || '',
+      content: data.content || data.message || '',
+      type: data.type || 'info'
+    }
   }
 }, { deep: true })
 </script>

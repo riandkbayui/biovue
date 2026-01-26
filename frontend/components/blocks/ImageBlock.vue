@@ -2,7 +2,7 @@
   <div class="space-y-3">
     <!-- Upload Area -->
     <div v-if="!localData.url" class="relative">
-      <input 
+      <input
         type="file"
         accept="image/*"
         @change="handleImageUpload"
@@ -23,9 +23,9 @@
     <!-- Preview Area -->
     <div v-else class="space-y-3">
       <div class="relative rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50">
-        <img :src="localData.url" :alt="localData.alt" class="w-full h-auto" />
+        <Image :src="localData.url" :alt="localData.alt" class="w-full h-auto" />
         <div class="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-          <button 
+          <button
             @click="$refs.imageInput.click()"
             type="button"
             class="px-3 py-2 rounded-lg bg-white text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-2"
@@ -33,7 +33,7 @@
             <i class="bi bi-arrow-repeat"></i>
             Ganti
           </button>
-          <button 
+          <button
             @click="removeImage"
             type="button"
             class="px-3 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors flex items-center gap-2"
@@ -44,7 +44,7 @@
         </div>
       </div>
 
-      <input 
+      <input
         v-model="localData.alt"
         @input="emitUpdate"
         type="text"
@@ -55,8 +55,8 @@
 
     <div v-if="localData.url" class="flex flex-wrap items-center gap-2">
       <span class="text-sm font-medium text-gray-700">Ukuran:</span>
-      <button 
-        v-for="size in ['small', 'medium', 'large']" 
+      <button
+        v-for="size in ['small', 'medium', 'large']"
         :key="size"
         @click="setSize(size)"
         :class="[
@@ -72,6 +72,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import Image from '@/components/Image.vue'
 import { useUpload } from '@/composables/useUpload'
 
 const props = defineProps({

@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-3">
-    <input 
+    <input
       v-model="localData.url"
       @input="emitUpdate"
       type="url"
@@ -9,8 +9,8 @@
     />
     <div class="flex flex-wrap items-center gap-2">
       <span class="text-sm font-medium text-gray-700">Platform:</span>
-      <button 
-        v-for="platform in ['youtube', 'vimeo', 'tiktok']" 
+      <button
+        v-for="platform in ['youtube', 'vimeo', 'tiktok']"
         :key="platform"
         @click="setPlatform(platform)"
         :class="[
@@ -40,8 +40,8 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update'])
 
 const localData = ref({
-  url: props.modelValue?.data?.url || '',
-  platform: props.modelValue?.data?.platform || 'youtube'
+  url: props.modelValue?.url || props.modelValue?.data?.url || '',
+  platform: props.modelValue?.platform || props.modelValue?.data?.platform || 'youtube'
 })
 
 const setPlatform = (platform) => {
@@ -50,12 +50,15 @@ const setPlatform = (platform) => {
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
-    localData.value = { ...newVal.data }
+  if (newVal) {
+    localData.value = {
+        url: newVal.url || newVal.data?.url || '',
+        platform: newVal.platform || newVal.data?.platform || 'youtube'
+    }
   }
 }, { deep: true })
 </script>

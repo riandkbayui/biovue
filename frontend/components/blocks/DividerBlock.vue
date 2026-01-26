@@ -2,8 +2,8 @@
   <div class="space-y-3">
     <div class="flex flex-wrap items-center gap-2">
       <span class="text-sm font-medium text-gray-700">Style:</span>
-      <button 
-        v-for="style in ['solid', 'dashed', 'dotted']" 
+      <button
+        v-for="style in ['solid', 'dashed', 'dotted']"
         :key="style"
         @click="setStyle(style)"
         :class="[
@@ -28,8 +28,8 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update'])
 
 const localData = ref({
-  style: props.modelValue?.data?.style || 'solid',
-  color: props.modelValue?.data?.color || '#e5e7eb'
+  style: props.modelValue?.style || props.modelValue?.data?.style || 'solid',
+  color: props.modelValue?.color || props.modelValue?.data?.color || '#e5e7eb'
 })
 
 const setStyle = (style) => {
@@ -38,12 +38,15 @@ const setStyle = (style) => {
 }
 
 const emitUpdate = () => {
-  emit('update', { data: localData.value })
+  emit('update', localData.value)
 }
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal?.data) {
-    localData.value = { ...newVal.data }
+  if (newVal) {
+    localData.value = {
+        style: newVal.style || newVal.data?.style || 'solid',
+        color: newVal.color || newVal.data?.color || '#e5e7eb'
+    }
   }
 }, { deep: true })
 </script>

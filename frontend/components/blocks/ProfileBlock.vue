@@ -4,22 +4,22 @@
       <!-- Avatar Upload -->
       <div class="flex-shrink-0">
         <div class="relative w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-50 group">
-          <img 
-            v-if="localData.avatar" 
-            :src="localData.avatar" 
-            class="w-full h-full object-cover" 
+          <Image
+            v-if="localData.avatar"
+            :src="localData.avatar"
+            class="w-full h-full object-cover"
           />
           <div v-else class="w-full h-full flex items-center justify-center text-gray-300">
             <i class="bi bi-person-fill text-4xl"></i>
           </div>
-          
+
           <!-- Overlay -->
           <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 cursor-pointer" @click="$refs.avatarInput.click()">
             <i class="bi bi-camera-fill text-white text-xl"></i>
             <span class="text-[10px] text-white font-medium">Ubah</span>
           </div>
         </div>
-        <input 
+        <input
           type="file"
           accept="image/*"
           @change="handleAvatarUpload"
@@ -30,14 +30,14 @@
 
       <!-- Info Inputs -->
       <div class="flex-1 w-full space-y-3">
-        <input 
+        <input
           v-model="localData.name"
           @input="emitUpdate"
           type="text"
           placeholder="Nama Lengkap / Brand"
           class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all font-bold text-lg"
         />
-        <textarea 
+        <textarea
           v-model="localData.bio"
           @input="emitUpdate"
           rows="2"
@@ -53,8 +53,8 @@
       <div class="flex items-center gap-2">
         <span class="text-xs font-medium text-gray-500">Posisi:</span>
         <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
-          <button 
-            v-for="align in ['left', 'center', 'right']" 
+          <button
+            v-for="align in ['left', 'center', 'right']"
             :key="align"
             @click="setAlign(align)"
             :class="[
@@ -71,7 +71,7 @@
       <div class="flex items-center gap-2">
         <span class="text-xs font-medium text-gray-500">Warna:</span>
         <div class="flex flex-wrap gap-1">
-          <button 
+          <button
             @click="setColor('accent')"
             title="Gunakan Warna Aksen"
             :class="[
@@ -82,8 +82,8 @@
             <i class="bi bi-star-fill text-[10px] text-amber-500"></i>
           </button>
 
-          <button 
-            v-for="color in colorPresets" 
+          <button
+            v-for="color in colorPresets"
             :key="color.hex"
             @click="setColor(color.hex)"
             :title="color.name"
@@ -101,6 +101,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import Image from '@/components/Image.vue'
 import { useUpload } from '@/composables/useUpload'
 
 const props = defineProps({
@@ -123,11 +124,11 @@ const colorPresets = [
 ]
 
 const localData = ref({
-  avatar: props.modelValue?.avatar || '',
-  name: props.modelValue?.name || '',
-  bio: props.modelValue?.bio || '',
-  align: props.modelValue?.align || 'center',
-  textColor: props.modelValue?.textColor || '#0f172a'
+  avatar: props.modelValue?.avatar || props.modelValue?.data?.avatar || '',
+  name: props.modelValue?.name || props.modelValue?.data?.name || '',
+  bio: props.modelValue?.bio || props.modelValue?.data?.bio || '',
+  align: props.modelValue?.align || props.modelValue?.data?.align || 'center',
+  textColor: props.modelValue?.textColor || props.modelValue?.data?.textColor || '#0f172a'
 })
 
 const setAlign = (align) => {
@@ -171,7 +172,14 @@ const emitUpdate = () => {
 
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    localData.value = { ...newVal }
+    const data = newVal.data || newVal
+    localData.value = {
+      avatar: data.avatar || '',
+      name: data.name || '',
+      bio: data.bio || '',
+      align: data.align || 'center',
+      textColor: data.textColor || '#0f172a'
+    }
   }
 }, { deep: true })
 </script>

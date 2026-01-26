@@ -34,7 +34,7 @@ class PageSeeder extends Seeder
             $userId = $user->id;
         }
 
-        $placeholderImg = base_url('uploads/general/placeholder.jpg');
+        $placeholderImg = 'uploads/general/placeholder.jpg';
 
         $pages = [
             [
