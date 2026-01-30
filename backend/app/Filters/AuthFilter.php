@@ -39,7 +39,18 @@ class AuthFilter implements FilterInterface
         }
 
         if (!$user) {
-            return service('response')->setJSON(['message' => 'Sesi berakhir atau token tidak valid'])->setStatusCode(401);
+            $response = service('response')->setJSON(['message' => 'Sesi berakhir atau token tidak valid'])->setStatusCode(401);
+
+            // Tambahkan header CORS manual agar 401 tidak terblokir oleh browser sebagai CORS error
+            $origin = $request->getHeaderLine('Origin');
+            $allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+
+            if (in_array($origin, $allowedOrigins)) {
+                $response->setHeader('Access-Control-Allow-Origin', $origin);
+                $response->setHeader('Access-Control-Allow-Credentials', 'true');
+            }
+
+            return $response;
         }
 
         // Simpan data user ke request dan ke static class Auth

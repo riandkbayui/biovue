@@ -17,7 +17,18 @@ class AdminFilter implements FilterInterface
 
         // AuthFilter harus dijalankan sebelum ini
         if (!isset($request->user) || $request->user->role !== 'admin') {
-            return service('response')->setJSON(['message' => 'Akses ditolak. Hanya untuk administrator.'])->setStatusCode(403);
+            $response = service('response')->setJSON(['message' => 'Akses ditolak. Hanya untuk administrator.'])->setStatusCode(403);
+
+            // Tambahkan header CORS manual
+            $origin = $request->getHeaderLine('Origin');
+            $allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+
+            if (in_array($origin, $allowedOrigins)) {
+                $response->setHeader('Access-Control-Allow-Origin', $origin);
+                $response->setHeader('Access-Control-Allow-Credentials', 'true');
+            }
+
+            return $response;
         }
     }
 

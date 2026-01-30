@@ -8,16 +8,11 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 /**
- * Handle OPTIONS Preflight Request
+ * API Routes (Explicitly defined to prevent 404 and ensure Filters run correctly)
  */
-$routes->options('api/(:any)', function() {
-    return service('response')->setStatusCode(200);
-});
-
-/**
- * API Routes (Manual Overrides for Auto Routing)
- */
-$routes->get('api/profile', '\App\Controllers\Api\Member\Profile::getIndex', ['filter' => 'auth']);
+$routes->get('api/member/profile', '\App\Controllers\Api\Member\Profile::getIndex', ['filter' => 'auth']);
+$routes->post('api/member/profile/update', '\App\Controllers\Api\Member\Profile::postUpdate', ['filter' => 'auth']);
+$routes->post('api/member/profile/change-password', '\App\Controllers\Api\Member\Profile::postChangePassword', ['filter' => 'auth']);
 
 /**
  * SPA Catch-all Route
